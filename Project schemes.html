@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Energy Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(circle at top left,#1f4b8f 0%,transparent 30%),
+        radial-gradient(circle at bottom right,#f58220 0%,transparent 25%),
+        linear-gradient(135deg,#eef3fb 0%,#f7f9fc 100%);
+    color:#1f2937;
+    overflow-x:hidden;
+}
+
+/* Animated background */
+
+body::before{
+    content:'';
+    position:fixed;
+    width:600px;
+    height:600px;
+    background:rgba(245,130,32,0.08);
+    border-radius:50%;
+    top:-200px;
+    right:-150px;
+    animation:floatBlob 10s ease-in-out infinite;
+    z-index:-1;
+}
+
+body::after{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:rgba(22,56,115,0.08);
+    border-radius:50%;
+    bottom:-180px;
+    left:-150px;
+    animation:floatBlob2 12s ease-in-out infinite;
+    z-index:-1;
+}
+
+@keyframes floatBlob{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(25px);}
+    100%{transform:translateY(0px);}
+}
+
+@keyframes floatBlob2{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-25px);}
+    100%{transform:translateY(0px);}
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+#loginScreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:transparent;
+}
+
+.login-box{
+    width:420px;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(14px);
+    padding:45px;
+    border-radius:24px;
+    box-shadow:0 15px 45px rgba(0,0,0,0.12);
+    animation:fadeInUp 0.8s ease;
+    border:1px solid rgba(255,255,255,0.4);
+}
+
+.login-box h1{
+    text-align:center;
+    margin-bottom:30px;
+    color:#163873;
+    font-size:38px;
+    letter-spacing:1px;
+}
+
+.login-box input{
+    width:100%;
+    padding:16px;
+    margin-bottom:18px;
+    border:1px solid #d1d5db;
+    border-radius:14px;
+    font-size:15px;
+    transition:all 0.3s ease;
+}
+
+.login-box input:focus{
+    outline:none;
+    border-color:#f58220;
+    box-shadow:0 0 0 4px rgba(245,130,32,0.15);
+    transform:translateY(-2px);
+}
+
+.login-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-weight:bold;
+}
+
+.login-btn:hover,
+.tool-btn:hover,
+.back-btn:hover{
+    transform:translateY(-3px) scale(1.02);
+    box-shadow:0 12px 24px rgba(22,56,115,0.25);
+}
+
+#error{
+    color:red;
+    margin-top:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
+#dashboard{
+    display:none;
+    padding:40px;
+}
+
+.dashboard-container{
+    max-width:1250px;
+    margin:auto;
+}
+
+.portal-header{
+    text-align:center;
+    margin-bottom:50px;
+    animation:fadeInUp 0.7s ease;
+}
+
+.portal-header h1{
+    color:#163873;
+    font-size:54px;
+    margin-bottom:10px;
+}
+
+.portal-header h2{
+    color:#f58220;
+    font-weight:normal;
+    font-size:22px;
+}
+
+.tools-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:28px;
+}
+
+.tool-card{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    border-radius:24px;
+    padding:34px;
+    box-shadow:0 10px 35px rgba(0,0,0,0.08);
+    transition:all 0.35s ease;
+    border:1px solid rgba(255,255,255,0.4);
+    position:relative;
+    overflow:hidden;
+    animation:fadeInUp 0.8s ease;
+}
+
+.tool-card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:5px;
+    background:linear-gradient(90deg,#163873,#f58220);
+}
+
+.tool-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 20px 45px rgba(0,0,0,0.14);
+}
+
+.tool-card h3{
+    color:#163873;
+    font-size:26px;
+    margin-bottom:12px;
+}
+
+.tool-card p{
+    line-height:1.7;
+    color:#4b5563;
+}
+
+.tool-btn{
+    margin-top:22px;
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-weight:bold;
+    font-size:15px;
+}
+
+/* =========================
+   TOOL PAGES
+========================= */
+
+.tool-page{
+    display:none;
+    padding:35px;
+    animation:fadeIn 0.4s ease;
+}
+
+.container{
+    max-width:1350px;
+    margin:auto;
+    background:rgba(255,255,255,0.94);
+    backdrop-filter:blur(14px);
+    padding:35px;
+    border-radius:28px;
+    box-shadow:0 14px 40px rgba(0,0,0,0.10);
+    border:1px solid rgba(255,255,255,0.4);
+}
+
+.back-btn{
+    margin-bottom:30px;
+    background:linear-gradient(135deg,#f58220,#d9651a);
+    color:white;
+    border:none;
+    padding:13px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-weight:bold;
+}
+
+/* =========================
+   TABLES
+========================= */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:25px;
+    overflow:hidden;
+    border-radius:18px;
+}
+
+th{
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    padding:14px;
+    border:1px solid #d9d9d9;
+}
+
+td{
+    border:1px solid #e5e7eb;
+    padding:12px;
+    background:white;
+}
+
+.section{
+    background:linear-gradient(135deg,#f58220,#d9651a);
+    color:white;
+    font-weight:bold;
+    text-align:center;
+}
+
+.output{
+    background:#eef3fb;
+    font-weight:bold;
+}
+
+.calc-input{
+    width:100%;
+    padding:10px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    transition:all 0.25s ease;
+}
+
+.calc-input:focus{
+    outline:none;
+    border-color:#f58220;
+    box-shadow:0 0 0 4px rgba(245,130,32,0.12);
+}
+
+.result-box{
+    margin-top:35px;
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    padding:40px;
+    border-radius:24px;
+    text-align:center;
+    box-shadow:0 14px 35px rgba(22,56,115,0.22);
+}
+
+.result{
+    font-size:72px;
+    font-weight:bold;
+}
+
+.eligible{
+    color:#7dff9a;
+    font-size:30px;
+    font-weight:bold;
+}
+
+.not-eligible{
+    color:#ffb3b3;
+    font-size:30px;
+    font-weight:bold;
+}
+
+/* =========================
+   BICS TOOL
+========================= */
+
+.card{
+    background:rgba(255,255,255,0.95);
+    padding:28px;
+    border-radius:22px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+    margin-top:20px;
+}
+
+.upload-section,
+.search-section{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-top:16px;
+}
+
+.search-section input{
+    flex:1;
+    min-width:240px;
+}
+
+.search-section button{
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    border:none;
+    padding:14px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-weight:bold;
+}
+
+.search-section button:hover{
+    transform:translateY(-2px);
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:20px;
+}
+
+.result-box-small{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.05);
+}
+
+.success{
+    color:#15803d;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.error{
+    color:#b91c1c;
+    font-weight:bold;
+}
+
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(25px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes fadeIn{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+
+
+/* =========================
+   PREMIUM DASHBOARD
+========================= */
+
+.premium-layout{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:270px;
+    background:
+        linear-gradient(180deg,#081c42 0%,#0b2d68 100%);
+    padding:30px 22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    box-shadow:8px 0 35px rgba(0,0,0,0.15);
+    overflow:hidden;
+}
+
+.sidebar::before{
+    content:'';
+    position:absolute;
+    width:300px;
+    height:300px;
+    background:rgba(245,130,32,0.12);
+    border-radius:50%;
+    bottom:-140px;
+    left:-120px;
+}
+
+.sidebar-logo{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#f58220,#ff9b47);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:42px;
+    font-weight:bold;
+    margin-bottom:40px;
+    box-shadow:0 12px 25px rgba(245,130,32,0.35);
+}
+
+.sidebar-menu{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.sidebar-item{
+    padding:16px 18px;
+    border-radius:16px;
+    color:white;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    font-weight:bold;
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(8px);
+}
+
+.sidebar-item:hover,
+.sidebar-item.active{
+    background:linear-gradient(135deg,#f58220,#ff9b47);
+    transform:translateX(6px);
+    box-shadow:0 10px 20px rgba(245,130,32,0.25);
+}
+
+.sidebar-footer{
+    color:white;
+    padding:18px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(10px);
+}
+
+.main-dashboard{
+    flex:1;
+    margin-left:270px;
+    padding:40px;
+}
+
+.hero-section{
+    background:
+        linear-gradient(135deg,rgba(255,255,255,0.94),rgba(255,255,255,0.88));
+    border-radius:28px;
+    padding:45px;
+    margin-bottom:35px;
+    box-shadow:0 14px 35px rgba(0,0,0,0.08);
+    position:relative;
+    overflow:hidden;
+}
+
+.hero-section::after{
+    content:'';
+    position:absolute;
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    background:rgba(31,75,143,0.08);
+    right:-120px;
+    top:-80px;
+}
+
+.hero-section h1{
+    font-size:56px;
+    color:#163873;
+    margin-bottom:12px;
+}
+
+.hero-section p{
+    font-size:20px;
+    color:#6b7280;
+}
+
+.tool-icon{
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:42px;
+    color:white;
+    margin-bottom:24px;
+    animation:floatIcon 3s ease-in-out infinite;
+}
+
+.blue-glow{
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    box-shadow:0 14px 30px rgba(22,56,115,0.35);
+}
+
+.orange-glow{
+    background:linear-gradient(135deg,#f58220,#ff9b47);
+    box-shadow:0 14px 30px rgba(245,130,32,0.35);
+}
+
+@keyframes floatIcon{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-6px);}
+    100%{transform:translateY(0px);}
+}
+
+@media(max-width:950px){
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .premium-layout{
+        flex-direction:column;
+    }
+
+    .main-dashboard{
+        margin-left:0;
+        padding:25px;
+    }
+
+}
+
+
+
+/* =========================
+   ANIMATED BRAND RING
+========================= */
+
+.brand-ring{
+    position:absolute;
+    width:180px;
+    height:180px;
+    border:18px solid #f58220;
+    border-top-color:transparent;
+    border-radius:50%;
+    animation:spinRing 10s linear infinite;
+    opacity:0.18;
+    z-index:0;
+}
+
+.login-ring{
+    top:-70px;
+    right:-70px;
+}
+
+.dashboard-ring{
+    top:40px;
+    right:60px;
+    width:240px;
+    height:240px;
+    border-width:22px;
+    opacity:0.10;
+}
+
+.hero-section{
+    position:relative;
+    overflow:hidden;
+}
+
+.login-box{
+    position:relative;
+    overflow:hidden;
+}
+
+@keyframes spinRing{
+    0%{
+        transform:rotate(0deg);
+    }
+    100%{
+        transform:rotate(360deg);
+    }
+}
+
+/* =========================
+   USER DISPLAY
+========================= */
+
+.user-banner{
+    display:inline-flex;
+    align-items:center;
+    gap:14px;
+    background:linear-gradient(135deg,#163873,#1f4b8f);
+    color:white;
+    padding:16px 24px;
+    border-radius:18px;
+    margin-top:22px;
+    font-size:20px;
+    font-weight:bold;
+    box-shadow:0 12px 28px rgba(22,56,115,0.28);
+    animation:fadeInUp 0.8s ease;
+}
+
+.user-avatar{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#f58220,#ff9b47);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    font-weight:bold;
+    box-shadow:0 8px 20px rgba(245,130,32,0.3);
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div id="loginScreen">
+
+    
+<div class="login-box">
+
+    <div class="brand-ring login-ring"></div>
+
+
+        <h1>Energy Portal</h1>
+
+        <input
+            type="text"
+            id="userID"
+            placeholder="Enter Your ID"
+        >
+
+        <button
+            class="login-btn"
+            onclick="login()"
+        >
+            Enter Portal
+        </button>
+
+        <div id="error"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+
+<div id="dashboard">
+
+    <div class="premium-layout">
+
+        <div class="sidebar">
+
+            <div>
+
+                <div class="sidebar-logo">
+                    ⚡
+                </div>
+
+                <div class="sidebar-menu">
+
+                    <div class="sidebar-item active">
+                        Dashboard
+                    </div>
+
+                    <div class="sidebar-item"
+                    onclick="openTool('eiiTool')">
+                        EII Calculator
+                    </div>
+
+                    <div class="sidebar-item"
+                    onclick="openTool('bicsTool')">
+                        BICS Qualifier
+                    </div>
+
+                    <div class="sidebar-item"
+                    onclick="openTool('sicEligibilityTool')">
+                        SIC Search
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="sidebar-footer">
+
+                
+<div class="user-banner">
+
+    <div class="user-avatar">
+        👤
+    </div>
+
+    <div id="welcomeMessage"></div>
+
+</div>
+
+
+            </div>
+
+        </div>
+
+        <div class="main-dashboard">
+
+            
+<div class="hero-section">
+
+    <div class="brand-ring dashboard-ring"></div>
+
+
+                <div>
+
+                    <h1>Welcome Back</h1>
+
+                    <p>
+                        Select a tool below to continue your workflow.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="tools-grid">
+
+                <div class="tool-card">
+
+                    <div class="tool-icon blue-glow">
+                        ⚡
+                    </div>
+
+                    <h3>Electricity Intensity Calculator</h3>
+
+                    <p>
+                        Calculate Electricity Intensity using EBITDA,
+                        staff costs and electricity usage.
+                    </p>
+
+                    <button
+                        class="tool-btn"
+                        onclick="openTool('eiiTool')"
+                    >
+                        Open Tool
+                    </button>
+
+                </div>
+
+                <div class="tool-card">
+
+                    <div class="tool-icon orange-glow">
+                        ◫
+                    </div>
+
+                    <h3>UK BICS Qualifier</h3>
+
+                    <p>
+                        Upload SIC-to-HS spreadsheets and retrieve
+                        Frontier and Foundational HS matches.
+                    </p>
+
+                    <button
+                        class="tool-btn"
+                        onclick="openTool('bicsTool')"
+                    >
+                        Open Tool
+                    </button>
+
+                </div>
+
+                <div class="tool-card">
+
+                    <div class="tool-icon blue-glow">
+                        ⌕
+                    </div>
+
+                    <h3>SIC Eligibility Search</h3>
+
+                    <p>
+                        Instantly check whether a SIC code
+                        qualifies for EII, BICS or ETS.
+                    </p>
+
+                    <button
+                        class="tool-btn"
+                        onclick="openTool('sicEligibilityTool')"
+                    >
+                        Open Tool
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     EII TOOL
+
+
+========================= -->
+
+<div id="eiiTool" class="tool-page">
+
+<div class="container">
+
+<button class="back-btn" onclick="goDashboard()">
+← Back To Dashboard
+</button>
+
+<h1>Electricity Intensity Calculator</h1>
+
+<table>
+
+<tr>
+    <th>Input</th>
+    <th>Year 1</th>
+    <th>Year 2</th>
+    <th>Year 3</th>
+</tr>
+
+<tr>
+
+    <td>Financial Year</td>
+
+    <td><input type="number" id="year1"
+    class="calc-input" value="2019"></td>
+
+    <td><input type="number" id="year2"
+    class="calc-input" value="2020"></td>
+
+    <td><input type="number" id="year3"
+    class="calc-input" value="2021"></td>
+
+</tr>
+
+<tr class="section">
+
+    <td colspan="4">Direct Inputs</td>
+
+</tr>
+
+<tr>
+
+    <td>EBITDA (£)</td>
+
+    <td><input type="number"
+    class="ebitda calc-input"></td>
+
+    <td><input type="number"
+    class="ebitda calc-input"></td>
+
+    <td><input type="number"
+    class="ebitda calc-input"></td>
+
+</tr>
+
+<tr>
+
+    <td>Staff Cost (£)</td>
+
+    <td><input type="number"
+    class="staff calc-input"></td>
+
+    <td><input type="number"
+    class="staff calc-input"></td>
+
+    <td><input type="number"
+    class="staff calc-input"></td>
+
+</tr>
+
+<tr>
+
+    <td>Total Business Electricity (MWh)</td>
+
+    <td><input type="number"
+    class="electricity calc-input"></td>
+
+    <td><input type="number"
+    class="electricity calc-input"></td>
+
+    <td><input type="number"
+    class="electricity calc-input"></td>
+
+</tr>
+
+</table>
+
+<table>
+
+<tr>
+    <th>Output</th>
+    <th>Year 1</th>
+    <th>Year 2</th>
+    <th>Year 3</th>
+</tr>
+
+<tr class="output">
+
+    <td>Representative Electricity Consumption</td>
+
+    <td id="rep1">£ 0</td>
+    <td id="rep2">£ 0</td>
+    <td id="rep3">£ 0</td>
+
+</tr>
+
+<tr class="output">
+
+    <td>GVA</td>
+
+    <td id="gva1">£ 0</td>
+    <td id="gva2">£ 0</td>
+    <td id="gva3">£ 0</td>
+
+</tr>
+
+<tr class="output">
+
+    <td>GDP Deflator Index</td>
+
+    <td id="index1">0</td>
+    <td id="index2">0</td>
+    <td id="index3">0</td>
+
+</tr>
+
+<tr class="output">
+
+    <td>GVA in 2012 Prices</td>
+
+    <td id="gva2012_1">£ 0</td>
+    <td id="gva2012_2">£ 0</td>
+    <td id="gva2012_3">£ 0</td>
+
+</tr>
+
+<tr class="output">
+
+    <td>Electricity Intensity</td>
+
+    <td id="ei1">0%</td>
+    <td id="ei2">0%</td>
+    <td id="ei3">0%</td>
+
+</tr>
+
+</table>
+
+<div class="result-box">
+
+    <h2>Total Electricity Intensity</h2>
+
+    <div class="result" id="totalEI">
+        0.00%
+    </div>
+
+    <div id="eligibility"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =========================
+     BICS TOOL
+========================= -->
+
+<div id="bicsTool" class="tool-page">
+
+<div class="container">
+
+<button class="back-btn" onclick="goDashboard()">
+← Back To Dashboard
+</button>
+
+<h1>SIC to HS Lookup Tool</h1>
+
+<p>
+Search SIC codes instantly using the built-in SIC-to-HS database.
+</p>
+
+<div class="card">
+
+    
+
+    <div id="uploadStatus"></div>
+
+    <div class="search-section">
+
+        <input
+            type="text"
+            id="sicInput"
+            placeholder="Enter SIC Code"
+        >
+
+        <button onclick="searchSIC()">
+            Search SIC
+        </button>
+
+    </div>
+
+    <div id="resultContainer" style="display:none;">
+
+        <div class="result-box-small">
+
+            <strong>SIC Code</strong>
+
+            <div id="sicCodeResult"></div>
+
+            <br>
+
+            <strong>SIC Description</strong>
+
+            <div id="sicDescriptionResult"></div>
+
+        </div>
+
+        <div class="result-grid">
+
+            <div class="result-box-small">
+
+                <h3>Top Frontier HS Matches</h3>
+
+                <div id="frontierResult"></div>
+
+            </div>
+
+            <div class="result-box-small">
+
+                <h3>Top Foundational HS Matches</h3>
+
+                <div id="foundationalResult"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =========================
+     SIC ELIGIBILITY TOOL
+========================= -->
+
+<div id="sicEligibilityTool" class="tool-page">
+
+<div class="container">
+
+<button class="back-btn" onclick="goDashboard()">
+← Back To Dashboard
+</button>
+
+<h1>SIC Eligibility Search</h1>
+
+<div class="card">
+
+    <div class="search-section">
+
+        <input
+            type="text"
+            id="eligibilitySicInput"
+            placeholder="Enter SIC Code"
+        >
+
+        <button onclick="searchEligibilitySIC()">
+            Search SIC
+        </button>
+
+    </div>
+
+    <div id="eligibilityResult" style="display:none; margin-top:25px;">
+
+        <div class="result-box-small">
+
+            <h2 id="eligibilityCode"></h2>
+
+            <p id="eligibilityDescription"></p>
+
+            <div id="qualificationResults"></div>
+
+            <div id="qualificationButtons" style="margin-top:20px;"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+
+
+/* =========================
+   SIC ELIGIBILITY TOOL
+========================= */
+
+const EII_CODES = {
+    "510": "Mining of hard coal",
+    "811": "Quarrying of ornamental and building stone, limestone, gypsum, chalk and slate",
+    "812": "Operation of gravel and sand pits; mining of clays and kaolin",
+    "899": "Other mining and quarrying not elsewhere classified",
+    "1012": "Processing and preserving of poultry meat",
+    "1061": "Manufacture of grain mill products",
+    "1091": "Manufacture of prepared feeds for farm animals",
+    "1106": "Manufacture of malt",
+    "1310": "Preparation and spinning of textile fibres",
+    "1320": "Weaving of textiles",
+    "1391": "Manufacture of knitted and crocheted fabrics",
+    "1393": "Manufacture of carpets and rugs",
+    "1395": "Manufacture of non-wovens and articles made from non-wovens, except apparel",
+    "1396": "Manufacture of other technical and industrial textiles",
+    "1399": "Manufacture of other textiles not elsewhere classified",
+    "1419": "Manufacture of other wearing apparel and accessories",
+    "1431": "Manufacture of knitted and crocheted hosiery",
+    "1439": "Manufacture of other knitted and crocheted apparel",
+    "1511": "Tanning and dressing of leather; dressing and dyeing of fur",
+    "1610": "Sawmilling and planing of wood",
+    "1621": "Manufacture of veneer sheets and wood-based panels",
+    "1629": "Manufacture of other products of wood; manufacture of articles of cork, straw and plaiting materials",
+    "1712": "Manufacture of paper and paperboard",
+    "1721": "Manufacture of corrugated paper and paperboard and of containers of paper and paperboard",
+    "1722": "Manufacture of household and sanitary goods and of toilet requisites",
+    "1724": "Manufacture of wallpaper",
+    "1920": "Manufacture of refined petroleum products",
+    "2011": "Manufacture of industrial gases",
+    "2013": "Manufacture of other inorganic basic chemicals",
+    "2014": "Manufacture of other organic basic chemicals",
+    "2015": "Manufacture of fertilisers and nitrogen compounds",
+    "2016": "Manufacture of plastics in primary forms",
+    "2017": "Manufacture of synthetic rubber in primary forms",
+    "2060": "Manufacture of man-made fibres",
+    "2211": "Manufacture of rubber tyres and tubes; retreading and rebuilding of rubber tyres",
+    "2219": "Manufacture of other rubber products",
+    "2221": "Manufacture of plastic plates, sheets, tubes and profiles",
+    "2222": "Manufacture of plastic packing goods",
+    "2229": "Manufacture of other plastic products",
+    "2311": "Manufacture of flat glass",
+    "2313": "Manufacture of hollow glass",
+    "2314": "Manufacture of glass fibres",
+    "2319": "Manufacture and processing of other glass, including technical glassware",
+    "2320": "Manufacture of refractory products",
+    "2331": "Manufacture of ceramic tiles and flags",
+    "2332": "Manufacture of bricks, tiles and construction products, in baked clay",
+    "2344": "Manufacture of other technical ceramic products",
+    "2349": "Manufacture of other ceramic products",
+    "2351": "Manufacture of cement",
+    "2352": "Manufacture of lime and plaster",
+    "2362": "Manufacture of plaster products for construction purposes",
+    "2365": "Manufacture of fibre cement",
+    "2399": "Manufacture of other non-metallic mineral products not elsewhere classified",
+    "2410": "Manufacture of basic iron and steel and of ferro-alloys",
+    "2420": "Manufacture of tubes, pipes, hollow profiles and related fittings of steel",
+    "2431": "Cold drawing of bars",
+    "2432": "Cold rolling of narrow strip",
+    "2434": "Cold drawing of wire",
+    "2442": "Aluminium production",
+    "2443": "Lead, zinc and tin production",
+    "2444": "Copper production",
+    "2445": "Other non-ferrous metal production",
+    "2451": "Casting of iron",
+    "2452": "Casting of steel",
+    "2453": "Casting of light metals",
+    "2454": "Casting of other non-ferrous metals",
+    "2592": "Manufacture of light metal packaging",
+    "2611": "Manufacture of electronic components",
+    "2720": "Manufacture of batteries and accumulators",
+    "2732": "Manufacture of other electronic and electric wires and cables",
+    "2891": "Manufacture of machinery for metallurgy"
+};
+const ETS_CODES = {
+    "1411": "Manufacture of leather clothes",
+    "1621": "Manufacture of veneer sheets and wood-based panels",
+    "1711": "Manufacture of pulp",
+    "1712": "Manufacture of paper and paperboard",
+    "2013": "Manufacture of other inorganic basic chemicals",
+    "2014": "Manufacture of other organic basic chemicals",
+    "2015": "Manufacture of fertilisers and nitrogen compounds",
+    "2314": "Manufacture of glass fibres",
+    "2410": "Manufacture of basic iron and steel and of ferro-alloys",
+    "2442": "Aluminium production",
+    "2443": "Lead, zinc and tin production",
+    "2444": "Copper production",
+    "2720": "Manufacture of batteries and accumulators"
+};
+const BICS_CODES = {
+    "1062": "Manufacture of starches and starch products",
+    "1081": "Manufacture of sugar",
+    "2011": "Manufacture of industrial gases",
+    "2013": "Manufacture of other inorganic basic chemicals",
+    "2014": "Manufacture of other organic basic chemicals",
+    "2015": "Manufacture of fertilisers and nitrogen compounds",
+    "2016": "Manufacture of plastics in primary forms",
+    "2017": "Manufacture of synthetic rubber in primary forms",
+    "2051": "Manufacture of explosives",
+    "2060": "Manufacture of man-made fibres",
+    "2110": "Manufacture of basic pharmaceutical products",
+    "2120": "Manufacture of pharmaceutical preparations",
+    "2211": "Manufacture of rubber tyres and tubes; retreading and rebuilding of rubber tyres",
+    "2221": "Manufacture of plastic plates, sheets, tubes and profiles",
+    "2229": "Manufacture of other plastic products",
+    "2311": "Manufacture of flat glass",
+    "2312": "Shaping and processing of flat glass",
+    "2313": "Manufacture of hollow glass",
+    "2314": "Manufacture of glass fibres",
+    "2319": "Manufacture and processing of other glass, including technical glassware",
+    "2343": "Manufacture of ceramic insulators and insulating fittings",
+    "2344": "Manufacture of other technical ceramic products",
+    "2351": "Manufacture of cement",
+    "2352": "Manufacture of lime and plaster",
+    "2363": "Manufacture of ready-mixed concrete",
+    "2364": "Manufacture of mortars",
+    "2399": "Manufacture of other non-metallic mineral products nec",
+    "2410": "Manufacture of basic iron and steel and of ferro-alloys",
+    "2420": "Manufacture of tubes, pipes, hollow profiles and related fittings, of steel",
+    "2431": "Cold drawing of bars",
+    "2432": "Cold rolling of narrow strip",
+    "2433": "Cold forming or folding",
+    "2434": "Cold drawing of wire",
+    "2441": "Precious metals production",
+    "2442": "Aluminium production",
+    "2443": "Lead, zinc and tin production",
+    "2444": "Copper production",
+    "2445": "Other non-ferrous metal production",
+    "2446": "Processing of nuclear fuel",
+    "2451": "Casting of iron",
+    "2452": "Casting of steel",
+    "2521": "Manufacture of central heating radiators and boilers",
+    "2529": "Manufacture of other tanks, reservoirs and containers of metal",
+    "2530": "Manufacture of steam generators, except central heating hot water boilers",
+    "2562": "Machining",
+    "2593": "Manufacture of wire products, chain and springs",
+    "2599": "Manufacture of other fabricated metal products nec",
+    "2611": "Manufacture of electronic components",
+    "2612": "Manufacture of loaded electronic boards",
+    "2660": "Manufacture of irradiation, electromedical and electrotherapeutic equipment",
+    "2670": "Manufacture of optical instruments and photographic equipment",
+    "2711": "Manufacture of electric motors, generators and transformers",
+    "2712": "Manufacture of electricity distribution and control apparatus",
+    "2720": "Manufacture of batteries and accumulators",
+    "2731": "Manufacture of fibre optic cables",
+    "2732": "Manufacture of other electronic and electric wires and cables",
+    "2733": "Manufacture of wiring devices",
+    "2790": "Manufacture of other electrical equipment",
+    "2811": "Manufacture of engines and turbines, except aircraft, vehicle and cycle engines",
+    "2812": "Manufacture of fluid power equipment",
+    "2813": "Manufacture of other pumps and compressors",
+    "2814": "Manufacture of other taps and valves",
+    "2815": "Manufacture of bearings, gears, gearing and driving elements",
+    "2825": "Manufacture of non-domestic cooling and ventilation equipment",
+    "2830": "Manufacture of agricultural and forestry machinery",
+    "2849": "Manufacture of other machine tools",
+    "2899": "Manufacture of other special-purpose machinery nec",
+    "2910": "Manufacture of motor vehicles",
+    "2920": "Manufacture of bodies (coachwork) for motor vehicles; manufacture of trailers and semi-trailers",
+    "2932": "Manufacture of other parts and accessories for motor vehicles",
+    "3011": "Building of ships and floating structures",
+    "3030": "Manufacture of air and spacecraft and related machinery",
+    "3040": "Manufacture of military fighting vehicles",
+    "3250": "Manufacture of medical and dental instruments and supplies",
+    "3299": "Other manufacturing nec",
+    "3316": "Repair and maintenance of aircraft and spacecraft",
+    "3521": "Manufacture of gas",
+    "3821": "Treatment and disposal of non-hazardous waste",
+    "3832": "Recovery of sorted materials"
+};
+
+function searchEligibilitySIC(){
+
+    const sic =
+        document.getElementById('eligibilitySicInput')
+        .value
+        .trim();
+
+    if(!sic){
+
+        alert('Please enter an SIC code.');
+        return;
+
+    }
+
+    const eiiMatch = EII_CODES[sic];
+    const etsMatch = ETS_CODES[sic];
+    const bicsMatch = BICS_CODES[sic];
+
+    if(!eiiMatch && !etsMatch && !bicsMatch){
+
+        document.getElementById('eligibilityResult')
+        .style.display = 'block';
+
+        document.getElementById('eligibilityCode')
+        .innerText = sic;
+
+        document.getElementById('eligibilityDescription')
+        .innerText =
+            'No qualification found for this SIC code.';
+
+        document.getElementById('qualificationResults')
+        .innerHTML = '';
+
+        document.getElementById('qualificationButtons')
+        .innerHTML = '';
+
+        return;
+
+    }
+
+    const activity =
+        eiiMatch || etsMatch || bicsMatch;
+
+    let results = '';
+    let buttons = '';
+
+    if(eiiMatch){
+
+        results += `
+        <div class="success" style="margin-bottom:15px;">
+            ✔ Qualifies for EII
+        </div>`;
+
+        buttons += `
+        <button
+            class="tool-btn"
+            onclick="openTool('eiiTool')"
+            style="margin-bottom:10px;"
+        >
+            Open Energy Intensity Calculator
+        </button>`;
+
+    }
+
+    if(bicsMatch){
+
+        results += `
+        <div class="success" style="margin-bottom:15px;">
+            ✔ Qualifies for BICS
+        </div>`;
+
+        buttons += `
+        <button
+            class="tool-btn"
+            onclick="openTool('bicsTool')"
+            style="margin-bottom:10px;"
+        >
+            Open BICS Qualifier
+        </button>`;
+
+    }
+
+    if(etsMatch){
+
+        results += `
+        <div class="success" style="margin-bottom:15px;">
+            ✔ Qualifies for ETS
+        </div>`;
+
+    }
+
+    document.getElementById('eligibilityResult')
+    .style.display = 'block';
+
+    document.getElementById('eligibilityCode')
+    .innerText = 'SIC ' + sic;
+
+    document.getElementById('eligibilityDescription')
+    .innerText = activity;
+
+    document.getElementById('qualificationResults')
+    .innerHTML = results;
+
+    document.getElementById('qualificationButtons')
+    .innerHTML = buttons;
+
+}
+
+
+/* =========================
+   USERS
+========================= */
+
+const users = [
+
+    {
+        id:"99645",
+        name:"Marwan"
+    },
+
+    {
+        id:"55555",
+        name:"Fahd"
+    },
+
+    {
+        id:"10000",
+        name:"Lina"
+    },
+
+    
+    {
+        id:"33333",
+        name:"Yara"
+    }
+
+];
+
+/* =========================
+   LOGIN
+========================= */
+
+function login(){
+
+    const enteredID =
+        document.getElementById("userID")
+        .value
+        .trim();
+
+    const validUser =
+        users.find(user => user.id === enteredID);
+
+    if(validUser){
+
+        document.getElementById("loginScreen")
+        .style.display = "none";
+
+        document.getElementById("dashboard")
+        .style.display = "block";
+
+        document.getElementById("welcomeMessage")
+        .innerText =
+        "Welcome, " + validUser.name;
+
+    }else{
+
+        document.getElementById("error")
+        .innerText =
+        "Invalid ID";
+
+    }
+
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function openTool(toolId){
+
+    document.querySelectorAll(".tool-page")
+    .forEach(page => {
+
+        page.style.display = "none";
+
+    });
+
+    document.getElementById("dashboard")
+    .style.display = "none";
+
+    document.getElementById(toolId)
+    .style.display = "block";
+
+}
+
+function goDashboard(){
+
+    document.querySelectorAll(".tool-page")
+    .forEach(page => {
+
+        page.style.display = "none";
+
+    });
+
+    document.getElementById("dashboard")
+    .style.display = "block";
+
+}
+
+/* =========================
+   EII TOOL
+========================= */
+
+const GDP = {
+
+    2016:0.935,
+    2017:0.915,
+    2018:0.890,
+    2019:0.867,
+    2020:0.789,
+    2021:0.810,
+    2022:0.810,
+    2023:0.750,
+    2024:0.721,
+    2025:0.721
+
+};
+
+const REFERENCE_PRICE = 166.84;
+
+function num(value){
+
+    return parseFloat(value) || 0;
+
+}
+
+function formatCurrency(value){
+
+    return value.toLocaleString(
+        undefined,
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+function calculate(){
+
+    let totalRepresentative = 0;
+    let totalGVA2012 = 0;
+
+    for(let i = 0; i < 3; i++){
+
+        const ebitda =
+            num(document.querySelectorAll('.ebitda')[i].value);
+
+        const staff =
+            num(document.querySelectorAll('.staff')[i].value);
+
+        const electricity =
+            num(document.querySelectorAll('.electricity')[i].value);
+
+        const year =
+            num(document.getElementById(`year${i+1}`).value);
+
+        const gva = ebitda + staff;
+
+        const gdpIndex = GDP[year] || 1;
+
+        const gva2012 = gva * gdpIndex;
+
+        const representativeElectricity =
+            electricity * REFERENCE_PRICE;
+
+        const intensity =
+            gva2012 > 0
+            ? (representativeElectricity / gva2012) * 100
+            : 0;
+
+        totalRepresentative += representativeElectricity;
+
+        totalGVA2012 += gva2012;
+
+        document.getElementById(`rep${i+1}`).innerText =
+            "£ " + formatCurrency(representativeElectricity);
+
+        document.getElementById(`gva${i+1}`).innerText =
+            "£ " + formatCurrency(gva);
+
+        document.getElementById(`index${i+1}`).innerText =
+            gdpIndex;
+
+        document.getElementById(`gva2012_${i+1}`).innerText =
+            "£ " + formatCurrency(gva2012);
+
+        document.getElementById(`ei${i+1}`).innerText =
+            intensity.toFixed(2) + "%";
+
+    }
+
+    const totalIntensity =
+        totalGVA2012 > 0
+        ? (totalRepresentative / totalGVA2012) * 100
+        : 0;
+
+    document.getElementById("totalEI").innerText =
+        totalIntensity.toFixed(2) + "%";
+
+    const eligibility =
+        document.getElementById("eligibility");
+
+    if(totalIntensity >= 20){
+
+        eligibility.innerHTML =
+            '<div class="eligible">THE BUSINESS IS ELIGIBLE</div>';
+
+    }else{
+
+        eligibility.innerHTML =
+            '<div class="not-eligible">THE BUSINESS IS NOT ELIGIBLE</div>';
+
+    }
+
+}
+
+document.querySelectorAll(".calc-input")
+.forEach(input => {
+
+    input.addEventListener("input", calculate);
+
+});
+
+calculate();
+
+/* =========================
+   BICS TOOL
+========================= */
+
+let sicData = [{"SIC Code": 1041, "Classification": "Foundational", "SIC Description": "Manufacture of oils and fats", "Top Frontier HS Matches": "292310 - Choline and its salts TT\n293944 - Norephedrine and its salts\n293930 - Caffeine and its salts\n293941 - Ephedrine and its salts\n293962 - Ergotamine \"INN\" and its salts", "Top Foundational HS Matches": "382313 - Industrial Oils: Tall Oil Fatty Acids Type\n382312 - Industrial Oils: Oleic Acid Type\n382311 - Industrial Oils: Stearic Acid Type\n382319 - Industrial Oils: Other Types Excluding Stearic, Oleic, Or Tall Oil Fatty Acids\n400291 - Other Synthetic Rubber Or Factice Latex From Oils", "Suggested Best Fit": "382313 - Industrial Oils: Tall Oil Fatty Acids Type"}, {"SIC Code": 1062, "Classification": "Foundational", "SIC Description": "Manufacture of starches and starch products", "Top Frontier HS Matches": "292310 - Choline and its salts\n843490 - Parts of milking machines and dairy machinery, n.e.s.\n843680 - Forestry machinery, n.e.s.\n300242 - Vaccines for veterinary medicine\n901380 - Optical appliances and instruments, n.e.s. in chapter 90", "Top Foundational HS Matches": "350520 - Glues Based On Starches, Or Modified Starches\n110819 - Starches Except Wheat, Maize, Potato, Manioc\n350510 - Dextrins And Other Modified Starches\n731412 - Stainless Steel Cloth: For Machines\n300242 - Veterinary Vaccines And Similar Products", "Suggested Best Fit": "350520 - Glues Based On Starches, Or Modified Starches"}, {"SIC Code": "1081", "Classification": "Foundational", "SIC Description": "Manufacture of sugar", "Top Frontier HS Matches": "294000 - Sugars, chemically pure (excl. sucrose, lactose, maltose, glucose and fructose); sugar ethers, sugar acetals and sugar esters, and their salts (excl. natural or reproduced by synthesis, provitamins, vitamins, hormones, glycosides, vegetable alkaloids and their salts, ethers, esters and other derivatives)\n940110 - Seats for aircraft\n902789 - Exposure meters\n300610 - Sterile surgical catgut\n901814 - Scintigraphic apparatus", "Top Foundational HS Matches": "170219 - Lactose Sugar (Less Than 99% Purity)\n170211 - High-Purity Lactose Sugar (99% Or More)\n170199 - Refined Sugar, In Solid Form, Nes, Pure Sucrose\n170290 - Sugar Nes, Invert Sugar, Caramel And Artificial Honey\n252910 - Feldspar", "Suggested Best Fit": "170219 - Lactose Sugar (Less Than 99% Purity)"}, {"SIC Code": "2011", "Classification": "Frontier", "SIC Description": "Manufacture of industrial gases", "Top Frontier HS Matches": "847950 - Industrial robots, n.e.s.\n841960 - Machinery for liquefying air or other gases\n902680 - Electronic instruments or apparatus for measuring or checking variables of liquids or gases, n.e.s.\n870710 - Bodies for the industrial assembly of motor cars and other motor vehicles principally designed for the transport of persons\n902690 - Parts and accessories for instruments and apparatus for measuring or checking the flow, level, pressure or other variables of liquids or gases, n.e.s.", "Top Foundational HS Matches": "842870 - Industrial Robots\n382370 - Industrial Fatty Alcohols\n710229 - Diamonds Industrial, Worked\n382312 - Industrial Oils: Oleic Acid Type\n841790 - Parts Of Industrial Or Laboratory Furnaces/Ovens", "Suggested Best Fit": "847950 - Industrial robots, n.e.s."}, {"SIC Code": "2013", "Classification": "Foundational", "SIC Description": "Manufacture of other inorganic basic chemicals", "Top Frontier HS Matches": "291821 - Salicylic acid and its salts (excl. inorganic or organic compounds of mercury)\n848420 - Mechanical seals\n292242 - Glutamic acid and its salts\n293963 - Lysergic acid and its salts\n730820 - Towers and lattice masts, of iron or steel", "Top Foundational HS Matches": "281119 - Inorganic Acids Nes\n292090 - Esters Of Inorganic Acids, Nes, Their Salts, Derivs\n281129 - Inorganic Oxygen Compounds Of Non-Metals Nes\n282510 - Hydrazine And Hydroxylamine, Inorganic Salts\n294200 - Organic Compounds, Nes", "Suggested Best Fit": "281119 - Inorganic Acids Nes"}, {"SIC Code": "2014", "Classification": "Foundational", "SIC Description": "Manufacture of other organic basic chemicals", "Top Frontier HS Matches": "291821 - Salicylic acid and its salts (excl. inorganic or organic compounds of mercury)\n848420 - Mechanical seals\n292242 - Glutamic acid and its salts\n293963 - Lysergic acid and its salts\n730820 - Towers and lattice masts, of iron or steel", "Top Foundational HS Matches": "294200 - Organic Compounds, Nes\n340290 - Organic Surfactant Washing, Cleaning Preparations Nes\n340241 - Cationic organic surface-active agents, whether or not put up for retail sale\n281119 - Inorganic Acids Nes\n292090 - Esters Of Inorganic Acids, Nes, Their Salts, Derivs", "Suggested Best Fit": "294200 - Organic Compounds, Nes"}, {"SIC Code": "2015", "Classification": "Foundational", "SIC Description": "Manufacture of fertilisers and nitrogen compounds", "Top Frontier HS Matches": "284430 - Cermets containing uranium depleted in U 235 or compounds of this product\n291821 - Salicylic acid and its salts (excl. inorganic or organic compounds of mercury)\n284443 - Uranium derived from U 233 and its compounds; alloys, dispersions incl. cermets, ceramic products and mixtures and compounds derived from U 233 or compounds of this product\n293723 - Oestrogens and progestogens\n901410 - Direction finding compasses", "Top Foundational HS Matches": "284590 - Isotopes Nes, Compounds\n284610 - Cerium Compounds\n294200 - Organic Compounds, Nes\n281129 - Inorganic Oxygen Compounds Of Non-Metals Nes\n284330 - Gold Compounds", "Suggested Best Fit": "284590 - Isotopes Nes, Compounds"}, {"SIC Code": "2016", "Classification": "Foundational", "SIC Description": "Manufacture of plastics in primary forms", "Top Frontier HS Matches": "850690 - Parts of primary cells and primary batteries, n.e.s.\n901831 - Syringes of plastics, with or without needles, used in medical, surgical, dental or veterinary sciences\n300431 - Medicaments containing insulin but not antibiotics, put up in measured doses \"incl. those for transdermal administration\" or in forms or packings for retail sale\n300441 - Medicaments containing ephedrine or its salts, not containing hormones, steroids used as hormones or antibiotics, put up in measured doses \"incl. those for transdermal administration\" or in forms or packings for retail sale\n300443 - Medicaments containing norephedrine or its salts, not containing hormones, steroids used as hormones or antibiotics, put up in measured doses \"incl. those for transdermal administration\" or in forms or packings for retail sale", "Top Foundational HS Matches": "391000 - Silicones, Primary Forms\n400300 - Reclaimed Rubber In Primary Forms\n721810 - Ingots And Other Primary Forms, Stainless Steel\n400599 - Other Compounded Unvulcanised Rubber In Primary Forms\n722410 - Ingots, Primary Forms Of Alloy Steel, Except Stainles", "Suggested Best Fit": "391000 - Silicones, Primary Forms"}, {"SIC Code": "2017", "Classification": "Foundational", "SIC Description": "Manufacture of synthetic rubber in primary forms", "Top Frontier HS Matches": "710421 - Diamonds, synthetic or reconstructed, unworked or simply sawn or roughly shaped\n401130 - New pneumatic tyres, of rubber, of a kind used for aircraft\n401213 - Retreaded pneumatic tyres, of rubber, of a kind used on aircraft\n850690 - Parts of primary cells and primary batteries, n.e.s.\n401110 - New pneumatic tyres, of rubber, of a kind used for motor cars, incl. station wagons and racing cars", "Top Foundational HS Matches": "400300 - Reclaimed Rubber In Primary Forms\n400599 - Other Compounded Unvulcanised Rubber In Primary Forms\n391000 - Silicones, Primary Forms\n400291 - Other Synthetic Rubber Or Factice Latex From Oils\n400299 - Other Synthetic Rubber Or Factice, Except Latex, From Oils", "Suggested Best Fit": "400300 - Reclaimed Rubber In Primary Forms"}, {"SIC Code": "2051", "Classification": "Frontier", "SIC Description": "Manufacture of explosives", "Top Frontier HS Matches": "360200 - Prepared explosives (excl. propellent powders)\n902789 - Exposure meters\n851769 - Videophones\n293890 - Digitalis glycosides\n901710 - Plotters as drafting machines", "Top Foundational HS Matches": "391290 - Other Cellulose Derivatives\n270730 - Xylole\n392190 - Other Plastic Sheets\n392690 - Other Plastic Articles\n391239 - Other Cellulose Ethers", "Suggested Best Fit": "360200 - Prepared explosives (excl. propellent powders)"}, {"SIC Code": "2060", "Classification": "Foundational", "SIC Description": "Manufacture of man-made fibres", "Top Frontier HS Matches": "854470 - Optical fibre cables made up of individually sheathed fibres, whether or not containing electric conductors or fitted with connectors\n847521 - Machines for making optical fibres and preforms thereof\n681511 - Carbon Fibres For Non-Electrical Uses\n854142 - Photovoltaic cells not assembled in modules or made up into panels\n854143 - Photovoltaic cells assembled in modules or made up into panels", "Top Foundational HS Matches": "854470 - Optical Fibres And Cables\n630790 - Made Up Articles With Textile Dress Pattern\n681511 - Carbon Fibres For Non-Electrical Uses\n681513 - Articles Of Carbon Fibres For Non-Electrical Uses\n750890 - Various Items Made From Nickel For Different Purposes", "Suggested Best Fit": "854470 - Optical Fibres And Cables"}, {"SIC Code": "2110", "Classification": "Frontier", "SIC Description": "Manufacture of basic pharmaceutical products", "Top Frontier HS Matches": "300590 - Wadding and articles of wadding, impregnated or coated with pharmaceutical substances or put up in forms or packings for retail sale for medical, surgical, dental or veterinary purposes\n300510 - Adhesive dressings and other articles having an adhesive layer, impregnated or covered with pharmaceutical substances or put up for retail sale for medical, surgical, dental or veterinary purposes\n701790 - Laboratory, hygienic or pharmaceutical glassware, whether or not graduated or calibrated (excl. glass having a linear coefficient of expansion <= 5 x 10 -6 per kelvin within a temperature range of 0°C to 300°C or of fused quartz or other fused silica, containers for the conveyance or packing of goods, measuring, checking or medical instruments and apparatus of chapter 90)\n300360 - Medicaments containing any of the following antimalarial active principles: artemisinin \"INN\" for oral ingestion combined with other pharmaceutical active ingredients, or amodiaquine \"INN\"; artelinic acid or its salts; artenimol \"INN\"; artemotil \"INN\"; artemether \"INN\"; artesunate \"INN\"; chloroquine \"INN\"; dihydroartemisinin \"INN\"; lumefantrine \"INN\"; mefloquine \"INN\"; piperaquine \"INN\"; pyrimethamine \"INN\" or sulfadoxine \"INN\", not containing hormones, steroids used as hormones or antibiotics, not in measured doses or put up for retail sale\n300460 - Medicaments containing any of the following antimalarial active principles: artemisinin \"INN\" for oral ingestion combined with other pharmaceutical active ingredients, or amodiaquine \"INN\"; artelinic acid or its salts; artenimol \"INN\"; artemotil \"INN\"; artemether \"INN\"; artesunate \"INN\"; chloroquine \"INN\"; dihydroartemisinin \"INN\"; lumefantrine \"INN\"; mefloquine \"INN\"; piperaquine \"INN\"; pyrimethamine \"INN\" or sulfadoxine \"INN\", put up in measured doses \"incl. those for transdermal administration\" or in forms or packings for retail sale (excl. containing antibiotics, hormones, alkaloids, provitamins, vitamins, or their derivatives)", "Top Foundational HS Matches": "701790 - Laboratory, Hygienic Or Pharmaceutical Glassware Nes\n848230 - Bearings, Spherical Roller\n392190 - Other Plastic Sheets\n691490 - Articles Of Ceramics, Except Porcelain Or China, Nes\n291521 - Acetic Acid", "Suggested Best Fit": "300590 - Wadding and articles of wadding, impregnated or coated with pharmaceutical substances or put up in forms or packings for retail sale for medical, surgical, dental or veterinary purposes"}, {"SIC Code": "2120", "Classification": "Frontier", "SIC Description": "Manufacture of pharmaceutical preparations", "Top Frontier HS Matches": "300630 - Opacifying preparations for x-ray examinations; diagnostic reagents for administration to patients\n300590 - Wadding and articles of wadding, impregnated or coated with pharmaceutical substances or put up in forms or packings for retail sale for medical, surgical, dental or veterinary purposes\n300510 - Adhesive dressings and other articles having an adhesive layer, impregnated or covered with pharmaceutical substances or put up for retail sale for medical, surgical, dental or veterinary purposes\n300660 - Chemical contraceptive preparations based on hormones, prostaglandins, thromboxanes, leukotrienes, derivatives and structural analogues thereof or on spermicides\n300670 - Gel preparations designed to be used  in human or veterinary medicine as a lubricant for parts of the body for surgical operations or physical examinations or as a coupling agent between the body and medical instruments", "Top Foundational HS Matches": "370790 - Chemical Preparations For Photographic Uses, Nes\n701790 - Laboratory, Hygienic Or Pharmaceutical Glassware Nes\n382499 - Chemical Products, Mixtures And Preparations; Others In Heading 3824\n340290 - Organic Surfactant Washing, Cleaning Preparations Nes\n300630 - Opacifying Preparations, X-Ray, Diagnostic Reagents", "Suggested Best Fit": "300630 - Opacifying preparations for x-ray examinations; diagnostic reagents for administration to patients"}, {"SIC Code": "2211", "Classification": "Frontier", "SIC Description": "Manufacture of rubber tyres and tubes; retreading and rebuilding of rubber tyres", "Top Frontier HS Matches": "401213 - Retreaded pneumatic tyres, of rubber, of a kind used on aircraft\n401130 - New pneumatic tyres, of rubber, of a kind used for aircraft\n401211 - Retreaded pneumatic tyres, of rubber, of a kind used on motor cars \"incl. station wagons and racing cars\n401110 - New pneumatic tyres, of rubber, of a kind used for motor cars, incl. station wagons and racing cars\n930120 - Rocket launchers; flame-throwers; grenade launchers; torpedo tubes and similar projectors", "Top Foundational HS Matches": "400610 - Camel-Back Strips For Retreading Rubber Tyres\n401310 - Inner Tubes Of Rubber For Motor Vehicles\n401140 - Pneumatic Tyres New Of Rubber For Motorcycles\n400690 - Rubber Unvulcanised As Rods, Tubes Or Profiles\n401180 - Rubber; New Pneumatic Tyres, Of A Kind Used On Construction, Mining Or Industrial Handling Vehicles And Machines", "Suggested Best Fit": "401213 - Retreaded pneumatic tyres, of rubber, of a kind used on aircraft"}, {"SIC Code": "2221", "Classification": "Foundational", "SIC Description": "Manufacture of plastic plates, sheets, tubes and profiles", "Top Frontier HS Matches": "930120 - Rocket launchers; flame-throwers; grenade launchers; torpedo tubes and similar projectors\n847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes\n902230 - X-ray tubes\n380190 - Preparations based on graphite or other carbon in the form of pastes, blocks, plates or other semi-manufactures (excl. carbonaceous pastes for electrodes and similar pastes for furnace linings)\n930190 - Military weapons, incl. sub-machine guns (excl. artillery weapons, rocket launchers, flame-throwers, grenade launchers, torpedo tubes and similar projectors,  revolvers and pistols of heading 9302 and cutting and thrusting weapons of heading 9307)", "Top Foundational HS Matches": "810295 - Molybdenum: Bars And Rods, Other Than Those Obtained Simply By Sintering, Profiles, Plates, Sheets, Strip And Foil\n790500 - Zinc Plates, Sheets, Strip And Foil\n392190 - Other Plastic Sheets\n400690 - Rubber Unvulcanised As Rods, Tubes Or Profiles\n730490 - Iron Or Steel Tubes, Pipes Or Hollow Profiles, Nes", "Suggested Best Fit": "810295 - Molybdenum: Bars And Rods, Other Than Those Obtained Simply By Sintering, Profiles, Plates, Sheets, Strip And Foil"}, {"SIC Code": "2229", "Classification": "Foundational", "SIC Description": "Manufacture of other plastic products", "Top Frontier HS Matches": "940120 - Seats for motor vehicles\n292411 - Meprobamate \"INN\"\n360340 - Detonating caps\n901710 - Plotters as drafting machines\n360320 - Detonating cords", "Top Foundational HS Matches": "392690 - Other Plastic Articles\n392190 - Other Plastic Sheets\n392119 - Other Cellular Plastic Sheets\n392350 - Plastic Stoppers, Lids, Caps And Other Closures\n350691 - Adhesives Based On Rubber Or Plastic, Package >1 Kg", "Suggested Best Fit": "392690 - Other Plastic Articles"}, {"SIC Code": "2311", "Classification": "Foundational", "SIC Description": "Manufacture of flat glass", "Top Frontier HS Matches": "848630 - Machines and apparatus for the manufacture of flat panel displays\n961700 - Vacuum flasks and other vacuum vessels, and parts thereof (excl. glass inners)\n847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes\n841410 - Vacuum pumps of a kind used for the manufacture of semiconductors or solely or principally used for the manufacture of flat panel displays\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad", "Top Foundational HS Matches": "700330 - Cast Glass Profiles\n700530 - Float Glass Etc In Sheets, Wired\n700320 - Cast Glass Sheet, Wired\n701980 - Glass Wool Products\n700529 - Float Glass Etc In Sheets, Non-Wired, Clear", "Suggested Best Fit": "700330 - Cast Glass Profiles"}, {"SIC Code": "2312", "Classification": "Foundational", "SIC Description": "Shaping and processing of flat glass", "Top Frontier HS Matches": "848630 - Machines and apparatus for the manufacture of flat panel displays\n847480 - Machinery for agglomerating, shaping or moulding ceramic paste\n847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes\n853710 - Numerical control panels with built-in automatic data-processing machines\n847330 - Electronic assemblies of automatic data-processing machines or for other machines of heading 8471, n.e.s.", "Top Foundational HS Matches": "370199 - Photographic Plates, Film In The Flat, Nes\n847330 - Parts And Accessories Of Data Processing Equipment Ne\n370130 - Photo Plates & Film In The Flat, Nes, Any Side >255Mm\n721661 - Iron/Steel Shapes: Cold-Formed, From Flat Sheets\n721669 - Iron/Steel Shapes: Cold-Formed, Not From Flat Sheets", "Suggested Best Fit": "370199 - Photographic Plates, Film In The Flat, Nes"}, {"SIC Code": "2313", "Classification": "Foundational", "SIC Description": "Manufacture of hollow glass", "Top Frontier HS Matches": "961700 - Vacuum flasks and other vacuum vessels, and parts thereof (excl. glass inners)\n847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes\n900190 - Lenses, prisms, mirrors and other optical elements, of any material, unmounted (excl. such elements of glass not optically worked, contact lenses and spectacle lenses)\n847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n701790 - Laboratory, hygienic or pharmaceutical glassware, whether or not graduated or calibrated (excl. glass having a linear coefficient of expansion <= 5 x 10 -6 per kelvin within a temperature range of 0°C to 300°C or of fused quartz or other fused silica, containers for the conveyance or packing of goods, measuring, checking or medical instruments and apparatus of chapter 90)", "Top Foundational HS Matches": "701980 - Glass Wool Products\n722880 - Hollow Drill Bars And Rods Of Alloy/Non-Alloy Steel\n701971 - Chemically Bonded Glass Fibre Fabrics\n730300 - Tubes, Pipes And Hollow Profiles, Of Cast Iron\n700530 - Float Glass Etc In Sheets, Wired", "Suggested Best Fit": "701980 - Glass Wool Products"}, {"SIC Code": "2314", "Classification": "Foundational", "SIC Description": "Manufacture of glass fibres", "Top Frontier HS Matches": "847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n681511 - Carbon Fibres For Non-Electrical Uses\n847521 - Machines for making optical fibres and preforms thereof\n961700 - Vacuum flasks and other vacuum vessels, and parts thereof (excl. glass inners)\n853670 - Connectors for optical fibres, optical fibre bundles or cables", "Top Foundational HS Matches": "701990 - Glass Fibres, Glass Wool And Articles Thereof Nes\n701911 - Glass Fibres: Short Strands, Up To 50Mm In Length\n701912 - Glass Fibres: Long Strands, Known As Rovings\n701919 - Glass Fibres: Thin Forms Like Slivers, Yarns & Threads\n701913 - Glass Fibre Yarns And Slivers", "Suggested Best Fit": "701990 - Glass Fibres, Glass Wool And Articles Thereof Nes"}, {"SIC Code": "2319", "Classification": "Frontier", "SIC Description": "Manufacture and processing of other glass, including technical glassware", "Top Frontier HS Matches": "847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n701790 - Laboratory, hygienic or pharmaceutical glassware, whether or not graduated or calibrated (excl. glass having a linear coefficient of expansion <= 5 x 10 -6 per kelvin within a temperature range of 0°C to 300°C or of fused quartz or other fused silica, containers for the conveyance or packing of goods, measuring, checking or medical instruments and apparatus of chapter 90)\n847330 - Electronic assemblies of automatic data-processing machines or for other machines of heading 8471, n.e.s.\n961700 - Vacuum flasks and other vacuum vessels, and parts thereof (excl. glass inners)\n853710 - Numerical control panels with built-in automatic data-processing machines", "Top Foundational HS Matches": "741521 - Copper Washers, Including Spring Washers\n842191 - Parts Of Centrifuges, Including Centrifugal Dryers\n690911 - Porcelain Ware For Laboratory, Chemical, Technical Us\n847150 - Standalone Computer Processing Units (Excluding Specific Models)\n690912 - Ceramic Wares: High Hardness For Labs & Technical Uses", "Suggested Best Fit": "847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)"}, {"SIC Code": "2343", "Classification": "Foundational", "SIC Description": "Manufacture of ceramic insulators and insulating fittings", "Top Frontier HS Matches": "284420 - Alloys, dispersions incl. cermets, ceramic products and mixtures containing uranium with iron enriched in U 235 \"ferro-uranium\"\n830230 - Base metal mountings, fittings and similar articles suitable for motor vehicles (excl. hinges and castors)\n284443 - Uranium derived from U 233 and its compounds; alloys, dispersions incl. cermets, ceramic products and mixtures and compounds derived from U 233 or compounds of this product\n848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit\n847480 - Machinery for agglomerating, shaping or moulding ceramic paste", "Top Foundational HS Matches": "680690 - Mineral Heat Or Sound Insulating Materials & Articles\n700800 - Multiple-Walled Insulating Units Of Glass\n760900 - Aluminium Pipe Or Tube Fittings\n690912 - Ceramic Wares: High Hardness For Labs & Technical Uses\n848790 - Machinery Parts: Not Containing Electrical Connectors, Insulators, Coils, Contacts Or Other Electrical Features, N.E.C. In Chapter 84", "Suggested Best Fit": "680690 - Mineral Heat Or Sound Insulating Materials & Articles"}, {"SIC Code": "2344", "Classification": "Frontier", "SIC Description": "Manufacture of other technical ceramic products", "Top Frontier HS Matches": "847480 - Machinery for agglomerating, shaping or moulding ceramic paste\n848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit\n284443 - Uranium derived from U 233 and its compounds; alloys, dispersions incl. cermets, ceramic products and mixtures and compounds derived from U 233 or compounds of this product\n284420 - Alloys, dispersions incl. cermets, ceramic products and mixtures containing uranium with iron enriched in U 235 \"ferro-uranium\"\n848420 - Mechanical seals", "Top Foundational HS Matches": "690919 - Ceramic Laboratory & Technical Ware Except Porcelain\n690912 - Ceramic Wares: High Hardness For Labs & Technical Uses\n591190 - Textile Products And Articles For Technical Uses, Nes\n690390 - Refractory Ceramic Articles Nes\n690310 - Refractory Ceramic Articles, >50% Carbon", "Suggested Best Fit": "847480 - Machinery for agglomerating, shaping or moulding ceramic paste"}, {"SIC Code": "2351", "Classification": "Foundational", "SIC Description": "Manufacture of cement", "Top Frontier HS Matches": "848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit\n292424 - Ethinamate \"INN\"\n902789 - Exposure meters\n293930 - Caffeine and its salts\n293962 - Ergotamine \"INN\" and its salts", "Top Foundational HS Matches": "252310 - Cement Clinkers\n252330 - Aluminous Cement\n252100 - Limestone Materials For Manufacture Of Lime Or Cement\n252329 - Portland Cement, Other Than White Cement\n681099 - Articles Of Cement, Concrete Or Artificial Stone Nes", "Suggested Best Fit": "252310 - Cement Clinkers"}, {"SIC Code": "2352", "Classification": "Foundational", "SIC Description": "Manufacture of lime and plaster", "Top Frontier HS Matches": "848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit\n292411 - Meprobamate \"INN\"\n850690 - Parts of primary cells and primary batteries, n.e.s.\n300251 - Cell therapy products\n292310 - Choline and its salts", "Top Foundational HS Matches": "252100 - Limestone Materials For Manufacture Of Lime Or Cement\n848530 - Additive Manufacturing Machines For Plaster/Cement/Ceramics/Glass\n850650 - Lithium Batteries\n390799 - Other Polyesters\n811213 - Beryllium: Waste And Scrap", "Suggested Best Fit": "252100 - Limestone Materials For Manufacture Of Lime Or Cement"}, {"SIC Code": "2363", "Classification": "Foundational", "SIC Description": "Manufacture of ready-mixed concrete", "Top Frontier HS Matches": "300214 - Immunological products, mixed, not put up in measured doses or in forms or packings for retail sale (excl. diagnostic reagents)\n841381 - Pumps for liquids, power-driven (excl. those of subheading 8413.11 and 8413.19, fuel, lubricating or cooling medium pumps for internal combustion piston engine, concrete pumps, general reciprocating or rotary positive displacement pumps and centrifugal pumps of all kinds)\n300390 - Medicaments consisting of two or more constituents mixed together for therapeutic or prophylactic uses, not in measured doses or put up for retail sale (excl. antibiotics containing hormones or steroids used as hormones, but not containing antibiotics, alkaloids or derivatives thereof, hormones, antibiotics, antimalarial active principles or goods of heading 3002, 3005 or 3006)\n300490 - Medicaments consisting of mixed or unmixed products for therapeutic or prophylactic purposes, put up in measured doses \"incl. those for transdermal administration\" or in forms or packings for retail sale (excl. containing antibiotics, hormones or steroids used as hormones, alkaloids, provitamins, vitamins, their derivatives, antimalarial active principles and blinded clinical trial kits)\n854159 - Semiconductor devices, n.e.s.", "Top Foundational HS Matches": "382440 - Additives For Making Cement, Mortar, Or Concrete\n681091 - Prefabricated Structural Items Of Cement Or Concrete\n681099 - Articles Of Cement, Concrete Or Artificial Stone Nes\n681019 - Tiles & Flagstones Of Cement, Concrete, Artificial Stone\n290244 - Mixed Xylene Isomers", "Suggested Best Fit": "382440 - Additives For Making Cement, Mortar, Or Concrete"}, {"SIC Code": "2364", "Classification": "Foundational", "SIC Description": "Manufacture of mortars", "Top Frontier HS Matches": "930110 - Artillery weapons \"e.g. guns, howitzers and mortars\"\n360350 - Igniters\n843680 - Forestry machinery, n.e.s.\n902781 - Mass spectrometers\n902230 - X-ray tubes", "Top Foundational HS Matches": "382450 - Mortars And Concretes: Non-Refractory\n381600 - Refractory Cements, Mortars, Concretes Except Graphit\n903210 - Thermostats\n390799 - Other Polyesters\n900220 - Optical Filters", "Suggested Best Fit": "382450 - Mortars And Concretes: Non-Refractory"}, {"SIC Code": "2399", "Classification": "Foundational", "SIC Description": "Manufacture of other non-metallic mineral products nec", "Top Frontier HS Matches": "382499 - Thiophenated sulphonic acids of bituminous mineral oil, and salts thereof; petroleum sulphonates (excl. those of ammonium, alkali metals or ethanolamines)\n848420 - Mechanical seals\n292429 - Lidocaine \"INN\"\n854290 - Parts of electronic integrated circuits, n.e.s.\n843330 - Haymaking machinery (excl. mowers)", "Top Foundational HS Matches": "284180 - Metallic Tungstates (Wolframates)\n271290 - Mineral Waxes Nes\n253090 - Mineral Substances, Nes\n680690 - Mineral Heat Or Sound Insulating Materials & Articles\n310311 - Fertilizers, Mineral Or Chemical; Phosphatic, Superphosphates, Weight >=35% Of P2O5", "Suggested Best Fit": "284180 - Metallic Tungstates (Wolframates)"}, {"SIC Code": "2410", "Classification": "Foundational", "SIC Description": "Manufacture of basic iron and steel and of ferro-alloys", "Top Frontier HS Matches": "284420 - Alloys, dispersions incl. cermets, ceramic products and mixtures containing uranium with iron enriched in U 235 \"ferro-uranium\"\n730820 - Towers and lattice masts, of iron or steel\n731600 - Anchors, grapnels and parts thereof, of iron or steel\n848310 - Cranks and crank shafts, of cast iron or cast steel\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad", "Top Foundational HS Matches": "732599 - Cast Articles Of Iron Or Steel, Nes\n720529 - Powders, Iron Or Steel, Other Than Alloy\n732690 - Articles Of Iron Or Steel, Nes\n732611 - Balls, Iron/Steel, Forged/Stamped For Grinding Mills\n721790 - Iron/Steel Wires: Others", "Suggested Best Fit": "732599 - Cast Articles Of Iron Or Steel, Nes"}, {"SIC Code": "2420", "Classification": "Foundational", "SIC Description": "Manufacture of tubes, pipes, hollow profiles and related fittings, of steel", "Top Frontier HS Matches": "731600 - Anchors, grapnels and parts thereof, of iron or steel\n730820 - Towers and lattice masts, of iron or steel\n300241 - Vaccines against SARS-related coronaviruses \"SARS-CoV species\", for human medicine\n848310 - Cranks and crank shafts, of cast iron or cast steel\n830230 - Base metal mountings, fittings and similar articles suitable for motor vehicles (excl. hinges and castors)", "Top Foundational HS Matches": "730490 - Iron Or Steel Tubes, Pipes Or Hollow Profiles, Nes\n730661 - Iron Or Steel (Excluding Cast Iron): Tubes, Pipes And Hollow Profiles (Not Seamless), Welded, Of Square Or Rectangular Cross-Section, N.E.C. In Chapter 73\n730669 - Iron Or Steel (Excluding Cast Iron): Tubes, Pipes And Hollow Profiles (Not Seamless), N.E.C. In Chapter 73, Welded, Of Non-Circular Cross-Section (Not Square Or Rectangular Cross-Section)\n730300 - Tubes, Pipes And Hollow Profiles, Of Cast Iron\n730690 - Tube/Pipe/Hollow Profile, Iron/Steel,Riveted/Open Sea", "Suggested Best Fit": "730490 - Iron Or Steel Tubes, Pipes Or Hollow Profiles, Nes"}, {"SIC Code": "2431", "Classification": "Foundational", "SIC Description": "Cold drawing of bars", "Top Frontier HS Matches": "901720 - Plotters as drawing or marking-out instruments\n847983 - Cold isostatic presses\n901790 - Parts and accessories for drawing, marking-out or mathematical calculating instruments and instruments for measuring length for use in the hand, n.e.s.\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad\n901710 - Plotters as drafting machines", "Top Foundational HS Matches": "741510 - Copper Nails, Tacks, Drawing Pins, Staples Etc\n721933 - Cold Rolled Stainless Steel, W >600Mm, T 1.0-3.0 Mm\n721934 - Cold Rolled Stainless Steel, W >600Mm, T 0.5-1.0 Mm\n721935 - Cold Rolled Stainless Steel, W >600Mm, T /0.5 Mm\n730431 - Iron/Non-Alloy Steel Pipe, Cold Drawn/Rolled, Nes", "Suggested Best Fit": "741510 - Copper Nails, Tacks, Drawing Pins, Staples Etc"}, {"SIC Code": "2432", "Classification": "Foundational", "SIC Description": "Cold rolling of narrow strip", "Top Frontier HS Matches": "847983 - Cold isostatic presses\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad\n847981 - Machinery for treating metal, incl. electric wire coil-winders, n.e.s. (excl. industrial robots, furnaces, dryers, spray guns and the like, high-pressure cleaning equipment and other jet cleaners, rolling millls or machines, machine tools and rope or cable-making machines)\n901720 - Plotters as drawing or marking-out instruments\n292310 - Choline and its salts", "Top Foundational HS Matches": "722550 - Cold Rolled Alloy-Steel, Width >600Mm, Nes\n722692 - Cold Rolled Alloy-Steel Nes Nfw, <600Mm Wide\n721933 - Cold Rolled Stainless Steel, W >600Mm, T 1.0-3.0 Mm\n721934 - Cold Rolled Stainless Steel, W >600Mm, T 0.5-1.0 Mm\n721935 - Cold Rolled Stainless Steel, W >600Mm, T /0.5 Mm", "Suggested Best Fit": "722550 - Cold Rolled Alloy-Steel, Width >600Mm, Nes"}, {"SIC Code": "2433", "Classification": "Frontier", "SIC Description": "Cold forming or folding", "Top Frontier HS Matches": "847983 - Cold isostatic presses\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad\n854141 - Light emitting diodes \"LED\"\n901710 - Plotters as drafting machines\n360320 - Detonating cords", "Top Foundational HS Matches": "721510 - Bar/Rod, Cold Formed/Finished Free Cutting Steel\n722220 - Stainless Steel Bar Nfw Than Cold Formed/Cold Finishe\n721550 - Iron/Steel Rods: Cold-Formed, Not Free-Cutting\n721661 - Iron/Steel Shapes: Cold-Formed, From Flat Sheets\n721669 - Iron/Steel Shapes: Cold-Formed, Not From Flat Sheets", "Suggested Best Fit": "847983 - Cold isostatic presses"}, {"SIC Code": "2434", "Classification": "Foundational", "SIC Description": "Cold drawing of wire", "Top Frontier HS Matches": "847983 - Cold isostatic presses\n901720 - Plotters as drawing or marking-out instruments\n854411 - Winding wire for electrical purposes, of copper, lacquered or enamelled\n901790 - Parts and accessories for drawing, marking-out or mathematical calculating instruments and instruments for measuring length for use in the hand, n.e.s.\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad", "Top Foundational HS Matches": "810296 - Molybdenum: Wire\n854411 - Insulated Winding Wire Of Copper\n810196 - Tungsten (Wolfram): Wire\n741510 - Copper Nails, Tacks, Drawing Pins, Staples Etc\n721933 - Cold Rolled Stainless Steel, W >600Mm, T 1.0-3.0 Mm", "Suggested Best Fit": "810296 - Molybdenum: Wire"}, {"SIC Code": "2441", "Classification": "Foundational", "SIC Description": "Precious metals production", "Top Frontier HS Matches": "902410 - Machines and appliances for universal testing of mechanical properties of metals or for tensile testing of metals\n902910 - Revolution counters, production counters, taximeters, milometers, pedometers and the like (excl. gas, liquid and electricity meters)\n902480 - Machines and appliances for testing the mechanical properties of materials (excl. metals)\n902830 - Electricity supply or production meters for alternating current, single-phase, incl. calibrating meters therefor\n382499 - Thiophenated sulphonic acids of bituminous mineral oil, and salts thereof; petroleum sulphonates (excl. those of ammonium, alkali metals or ethanolamines)", "Top Foundational HS Matches": "711291 - Waste And Scrap Of Precious Metals: Of Gold, Including Metal Clad With Gold But Excluding Sweepings Containing Other Precious Metals\n711292 - Waste And Scrap Of Precious Metals: Of Platinum, Including Metal Clad With Platinum But Excluding Sweepings Containing Other Precious Metals\n282739 - Chlorides Of Metals Nes\n283329 - Sulphates Of Metals Nes\n283529 - Phosphates Of Metals Nes", "Suggested Best Fit": "711291 - Waste And Scrap Of Precious Metals: Of Gold, Including Metal Clad With Gold But Excluding Sweepings Containing Other Precious Metals"}, {"SIC Code": "2442", "Classification": "Foundational", "SIC Description": "Aluminium production", "Top Frontier HS Matches": "902910 - Revolution counters, production counters, taximeters, milometers, pedometers and the like (excl. gas, liquid and electricity meters)\n902830 - Electricity supply or production meters for alternating current, single-phase, incl. calibrating meters therefor\n292330 - Tetraethylammonium perfluorooctane sulphonate\n903149 - Profile projectors\n300212 - Antisera and other blood fractions", "Top Foundational HS Matches": "281830 - Aluminium Hydroxide\n282612 - Aluminium Fluoride\n282732 - Aluminium Chloride\n283322 - Aluminium Sulphate\n761090 - Aluminium Structures And Parts Nes, For Construction", "Suggested Best Fit": "281830 - Aluminium Hydroxide"}, {"SIC Code": "2443", "Classification": "Foundational", "SIC Description": "Lead, zinc and tin production", "Top Frontier HS Matches": "850660 - Air-zinc cells and batteries (excl. spent)\n850680 - Dry zinc-carbon batteries of a voltage of >= 5,5 V but <= 6,5 V (excl. spent)\n850720 - Lead-acid accumulators, working with liquid electrolyte (excl. spent and starter batteries)\n850780 - Electric accumulators (excl. spent, and lead-acid, nickel-cadmium, nickel-metal hydride and lithium-ion accumulators)\n850710 - Lead-acid accumulators of a kind used for starting piston engines (starter batteries), working with liquid electrolyte (excl. spent)", "Top Foundational HS Matches": "281700 - Zinc Oxide And Peroxide\n790310 - Zinc Dust\n790120 - Zinc Alloys Unwrought\n850660 - Air-Zinc Batteries\n740321 - Copper-Zinc Base Alloys, Unwrought", "Suggested Best Fit": "281700 - Zinc Oxide And Peroxide"}, {"SIC Code": "2444", "Classification": "Foundational", "SIC Description": "Copper production", "Top Frontier HS Matches": "854460 - Electric conductors for a voltage > 1.000 V, insulated, with copper conductors, n.e.s.\n854411 - Winding wire for electrical purposes, of copper, lacquered or enamelled\n902830 - Electricity supply or production meters for alternating current, single-phase, incl. calibrating meters therefor\n902910 - Revolution counters, production counters, taximeters, milometers, pedometers and the like (excl. gas, liquid and electricity meters)\n903149 - Profile projectors", "Top Foundational HS Matches": "283325 - Copper Sulphates\n260300 - Copper Ores And Concentrates\n740313 - Billets, Copper, Unwrought\n740319 - Refined Copper Products, Unwrought, Nes\n740312 - Wire Bars, Copper, Unwrought", "Suggested Best Fit": "283325 - Copper Sulphates"}, {"SIC Code": "2445", "Classification": "Foundational", "SIC Description": "Other non-ferrous metal production", "Top Frontier HS Matches": "850750 - Nickel-metal hydride accumulators (excl. spent)\n901832 - Tubular metal needles, used in medical, surgical, dental or veterinary sciences\n850780 - Electric accumulators (excl. spent, and lead-acid, nickel-cadmium, nickel-metal hydride and lithium-ion accumulators)\n830230 - Base metal mountings, fittings and similar articles suitable for motor vehicles (excl. hinges and castors)\n902830 - Electricity supply or production meters for alternating current, single-phase, incl. calibrating meters therefor", "Top Foundational HS Matches": "720310 - Ferrous Products From Direct Reduction Of Iron Ore\n720449 - Ferrous Waste Or Scrap, Nes\n840211 - Water Tube Boilers, Steam Production < 45T Per Hour\n840212 - Water Tube Boilers, Steam Production < 45T Per Hour\n401011 - Metal-Reinforced Rubber Conveyor Belts", "Suggested Best Fit": "720310 - Ferrous Products From Direct Reduction Of Iron Ore"}, {"SIC Code": "2446", "Classification": "Frontier", "SIC Description": "Processing of nuclear fuel", "Top Frontier HS Matches": "284450 - Spent \"irradiated\" fuel elements \"cartridges\" of nuclear reactors [Euratom]\n840130 - Fuel elements \"cartridges\", non-irradiated, in casing with handling fixtures, for nuclear reactors [Euratom]\n840110 - Nuclear reactors [Euratom]\n840140 - Parts of nuclear reactors, n.e.s. [Euratom]\n847330 - Electronic assemblies of automatic data-processing machines or for other machines of heading 8471, n.e.s.", "Top Foundational HS Matches": "284450 - Spent Fuel Elements Of Nuclear Reactors\n840130 - Fuel Elements Non-Irradiated, For Nuclear Reactors\n840110 - Nuclear Reactors\n840140 - Parts Of Nuclear Reactors\n841610 - Furnace Burners For Liquid Fuel", "Suggested Best Fit": "284450 - Spent \"irradiated\" fuel elements \"cartridges\" of nuclear reactors [Euratom]"}, {"SIC Code": "2451", "Classification": "Foundational", "SIC Description": "Casting of iron", "Top Frontier HS Matches": "730820 - Towers and lattice masts, of iron or steel\n731600 - Anchors, grapnels and parts thereof, of iron or steel\n848310 - Cranks and crank shafts, of cast iron or cast steel\n284420 - Alloys, dispersions incl. cermets, ceramic products and mixtures containing uranium with iron enriched in U 235 \"ferro-uranium\"\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad", "Top Foundational HS Matches": "732599 - Cast Articles Of Iron Or Steel, Nes\n730110 - Sheet Piling Of Iron Or Steel\n720610 - Iron Or Non-Alloy Steel In Ingots, <99.94% Iron\n720410 - Waste Or Scrap, Of Cast Iron\n260120 - Roasted Iron Pyrites", "Suggested Best Fit": "732599 - Cast Articles Of Iron Or Steel, Nes"}, {"SIC Code": "2452", "Classification": "Foundational", "SIC Description": "Casting of steel", "Top Frontier HS Matches": "730820 - Towers and lattice masts, of iron or steel\n731600 - Anchors, grapnels and parts thereof, of iron or steel\n848310 - Cranks and crank shafts, of cast iron or cast steel\n721090 - Flat-rolled products of iron or non-alloy steel, of a width of >= 600 mm, hot-rolled or cold-rolled \"cold-reduced\", clad\n842139 - Machinery and apparatus for filtering or purifying gases, with stainless steel housing and with inlet and outlet tube bores with inside diameters <= 1,3 cm", "Top Foundational HS Matches": "732599 - Cast Articles Of Iron Or Steel, Nes\n730110 - Sheet Piling Of Iron Or Steel\n730721 - Flanges, Stainless Steel\n722300 - Wire Of Stainless Steel\n732690 - Articles Of Iron Or Steel, Nes", "Suggested Best Fit": "732599 - Cast Articles Of Iron Or Steel, Nes"}, {"SIC Code": "2521", "Classification": "Frontier", "SIC Description": "Manufacture of central heating radiators and boilers", "Top Frontier HS Matches": "843239 - Central driven precision spacing seeders (excl. no-till direct seeders)\n853310 - Fixed carbon resistors, composition or film types (excl. heating resistors)\n847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n870891 - Radiators and parts thereof, for the industrial assembly of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" of a cylinder capacity <= 2500 cm³ or with spark-ignition internal piston engine of a cylinder capacity <= 2800 cm³, special purpose motor vehicles of heading 8705, n.e.s\n843621 - Poultry incubators and brooders", "Top Foundational HS Matches": "840220 - Super-Heated Water Boilers\n840290 - Parts Of Steam Or Vapour Generating Boilers Nes\n841990 - Parts, Laboratory/Industrial Heating/Cooling Machiner\n840219 - Vapour Generating Boilers Nes, Hybrid Boilers\n840410 - Auxiliary Plant For Steam/Vapour Generating Boilers", "Suggested Best Fit": "843239 - Central driven precision spacing seeders (excl. no-till direct seeders)"}, {"SIC Code": "2529", "Classification": "Foundational", "SIC Description": "Manufacture of other tanks, reservoirs and containers of metal", "Top Frontier HS Matches": "871000 - Tanks and other armoured fighting vehicles, motorised, whether or not fitted with weapons, and parts of such vehicles, n.e.s.\n850780 - Electric accumulators (excl. spent, and lead-acid, nickel-cadmium, nickel-metal hydride and lithium-ion accumulators)\n901839 - Needles, catheters, cannulae and the like, used in medical, surgical, dental or veterinary sciences (excl. syringes, tubular metal needles and needles for sutures)\n850750 - Nickel-metal hydride accumulators (excl. spent)\n890790 - Rafts, tanks, coffer-dams, landing stages, buoys, beacons and other floating structures (excl. inflatable rafts, vessels of heading 8901 to 8906 and floating structures for breaking up)", "Top Foundational HS Matches": "761100 - Aluminium Reservoirs,Vats, Tanks, Etc, Volume >300L\n730900 - Reservoirs/Tanks/Vats/Etc, Iron/Steel Capacity >300L\n761210 - Aluminium Containers, Collapsible Tubular\n761300 - Aluminium Containers For Compressed Or Liquefied Gas\n701090 - Glass Containers Nes For Packing Or Conveyance Goods", "Suggested Best Fit": "761100 - Aluminium Reservoirs,Vats, Tanks, Etc, Volume >300L"}, {"SIC Code": "2530", "Classification": "Frontier", "SIC Description": "Manufacture of steam generators, except central heating hot water boilers", "Top Frontier HS Matches": "847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n854320 - Signal generators, electrical\n851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s.\n840681 - Steam and other vapour turbines, of an output > 40 MW (excl. those for marine propulsion)\n840682 - Steam and other vapour turbines, of an output <= 40 MW (excl. those for marine propulsion)", "Top Foundational HS Matches": "840211 - Water Tube Boilers, Steam Production < 45T Per Hour\n840212 - Water Tube Boilers, Steam Production < 45T Per Hour\n840220 - Super-Heated Water Boilers\n840290 - Parts Of Steam Or Vapour Generating Boilers Nes\n840410 - Auxiliary Plant For Steam/Vapour Generating Boilers", "Suggested Best Fit": "847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)"}, {"SIC Code": "2562", "Classification": "Frontier", "SIC Description": "Machining", "Top Frontier HS Matches": "843410 - Milking machines\n903110 - Machines for balancing mechanical parts\n841960 - Machinery for liquefying air or other gases\n292429 - Lidocaine \"INN\"\n843680 - Forestry machinery, n.e.s.", "Top Foundational HS Matches": "293040 - Methionine\n390920 - Melamine Resins\n280110 - Chlorine\n290543 - Mannitol\n841960 - Machinery For Liquefying Air Or Other Gases", "Suggested Best Fit": "843410 - Milking machines"}, {"SIC Code": "2593", "Classification": "Foundational", "SIC Description": "Manufacture of wire products, chain and springs", "Top Frontier HS Matches": "854411 - Winding wire for electrical purposes, of copper, lacquered or enamelled\n847981 - Machinery for treating metal, incl. electric wire coil-winders, n.e.s. (excl. industrial robots, furnaces, dryers, spray guns and the like, high-pressure cleaning equipment and other jet cleaners, rolling millls or machines, machine tools and rope or cable-making machines)\n292429 - Lidocaine \"INN\"\n902190 - Parts and accessories of hearing aids, n.e.s.\n848420 - Mechanical seals", "Top Foundational HS Matches": "722300 - Wire Of Stainless Steel\n722990 - Wire Of Alloy Steel Nes\n740811 - Wire Of Refined Copper > 6Mm Wide\n740819 - Wire Of Refined Copper < 6Mm Wide\n722920 - Wire Of Silico-Manganese Steel", "Suggested Best Fit": "722300 - Wire Of Stainless Steel"}, {"SIC Code": "2599", "Classification": "Frontier", "SIC Description": "Manufacture of other fabricated metal products nec", "Top Frontier HS Matches": "850750 - Nickel-metal hydride accumulators (excl. spent)\n901832 - Tubular metal needles, used in medical, surgical, dental or veterinary sciences\n850780 - Electric accumulators (excl. spent, and lead-acid, nickel-cadmium, nickel-metal hydride and lithium-ion accumulators)\n830230 - Base metal mountings, fittings and similar articles suitable for motor vehicles (excl. hinges and castors)\n901839 - Needles, catheters, cannulae and the like, used in medical, surgical, dental or veterinary sciences (excl. syringes, tubular metal needles and needles for sutures)", "Top Foundational HS Matches": "848580 - Additive Manufacturing Machines For Non-Metal/Non-Plastic Materials\n901832 - Tubular Metal Needles And Needles For Sutures\n848510 - Machines For Additive Manufacturing; By Metal Deposit\n401019 - Rubber Conveyor Belts (Not Just Metal Or Textile Reinforced)\n283990 - Commercial Alkali Metal Silicates, Silicates Nes", "Suggested Best Fit": "850750 - Nickel-metal hydride accumulators (excl. spent)"}, {"SIC Code": "2611", "Classification": "Frontier", "SIC Description": "Manufacture of electronic components", "Top Frontier HS Matches": "903210 - Electronic thermostats\n854290 - Parts of electronic integrated circuits, n.e.s.\n902710 - Electronic gas or smoke analysis apparatus\n854233 - Electronic multi-component integrated circuits \"MCOs\" as amplifiers as specified in note 9 (b) (4) to chapter 85\n847330 - Electronic assemblies of automatic data-processing machines or for other machines of heading 8471, n.e.s.", "Top Foundational HS Matches": "853400 - Electronic Printed Circuits\n854233 - Electronic Integrated Circuits: Amplifiers\n854290 - Parts Of Electronic Integrated Circuits Etc\n854232 - Electronic Integrated Circuits: Memories\n854239 - Electronic Integrated Circuits: N.E.C. In Heading No. 8542", "Suggested Best Fit": "903210 - Electronic thermostats"}, {"SIC Code": "2612", "Classification": "Frontier", "SIC Description": "Manufacture of loaded electronic boards", "Top Frontier HS Matches": "903210 - Electronic thermostats\n854290 - Parts of electronic integrated circuits, n.e.s.\n902710 - Electronic gas or smoke analysis apparatus\n853890 - Electronic assemblies for wafer probers of subheading 8536.90.20\n848620 - Machines and apparatus for the manufacture of semiconductor devices or of electronic integrated circuits", "Top Foundational HS Matches": "853400 - Electronic Printed Circuits\n853710 - Electrical Control And Distribution Boards, < 1Kv\n853720 - Electrical Control And Distribution Boards, > 1Kv\n854290 - Parts Of Electronic Integrated Circuits Etc\n381800 - Chemical Element/Compound Wafers Doped For Electronic", "Suggested Best Fit": "903210 - Electronic thermostats"}, {"SIC Code": "2660", "Classification": "Frontier", "SIC Description": "Manufacture of irradiation, electromedical and electrotherapeutic equipment", "Top Frontier HS Matches": "901420 - Inertial navigation systems for aeronautical or space navigation (excl. compasses and radio navigational equipment)\n901841 - Dental drill engines, whether or not combined on a single base with other dental equipment\n851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s.\n843120 - Parts of fork-lift trucks and other works trucks fitted with lifting or handling equipment, n.e.s.\n901480 - Navigational instruments and apparatus (excl. for aeronautical or space navigation, compasses and radio navigational equipment)", "Top Foundational HS Matches": "852582 - Radiation-Hardened Camera Equipment\n851440 - Industrial Induction/Dielectric Heating Equipment Nes\n852583 - Night Vision Camera Equipment\n852581 - High-Speed Camera Equipment\n902790 - Microtomes, Parts Of Scientific Analysis Equipment", "Suggested Best Fit": "901420 - Inertial navigation systems for aeronautical or space navigation (excl. compasses and radio navigational equipment)"}, {"SIC Code": "2670", "Classification": "Frontier", "SIC Description": "Manufacture of optical instruments and photographic equipment", "Top Frontier HS Matches": "901380 - Optical appliances and instruments, n.e.s. in chapter 90\n901850 - Ophthalmic instruments and appliances, non-optical, n.e.s.\n901480 - Navigational instruments and apparatus (excl. for aeronautical or space navigation, compasses and radio navigational equipment)\n902750 - Instruments and apparatus for physical or chemical analysis, using UV, visible or IR optical radiations (excl. spectrometers, spectrophotometers, spectrographs, and gas or smoke analysis apparatus)\n901540 - Photogrammetrical surveying instruments and appliances", "Top Foundational HS Matches": "901380 - Optical Devices, Appliances And Instruments, Nes\n902750 - Instruments Nes Using Optical Radiations\n901480 - Navigational Instruments And Appliances Nes\n370790 - Chemical Preparations For Photographic Uses, Nes\n902789 - Analysis Instruments: Viscosity, Porosity, Exposure Meters", "Suggested Best Fit": "901380 - Optical appliances and instruments, n.e.s. in chapter 90"}, {"SIC Code": "2711", "Classification": "Frontier", "SIC Description": "Manufacture of electric motors, generators and transformers", "Top Frontier HS Matches": "903120 - Test benches for motors, generators, pumps, etc.\n850300 - Non-magnetic retaining rings for electric motors and electric generating sets\n851140 - Starter motors and dual purpose starter-generators of a kind used for spark-ignition or compression-ignition internal combustion engines\n870220 - Motor vehicles for the transport of >= 10 persons, incl. driver, with both diesel engine and electric motor as motors for propulsion, of a cylinder capacity of > 2.500 cm³\n870123 - Road tractors for semi-trailers, with both spark-ignition internal combustion piston engine and electric motor as motors for propulsion, new", "Top Foundational HS Matches": "850300 - Parts For Electric Motors And Generators\n850132 - Dc Motors, Dc Generators, Of An Output 0.75-75 Kw\n850131 - Dc Motors, Dc Generators, Of An Output < 750 Watts\n850110 - Electric Motors Of An Output < 37.5 Watts\n850133 - Dc Motors, Dc Generators, Of An Output 75-375 Kw", "Suggested Best Fit": "903120 - Test benches for motors, generators, pumps, etc."}, {"SIC Code": "2712", "Classification": "Frontier", "SIC Description": "Manufacture of electricity distribution and control apparatus", "Top Frontier HS Matches": "853720 - Boards, cabinets and similar combinations of apparatus for electric control or the distribution of electricity, for a voltage > 1.000 V but <= 72,5 kV\n852692 - Radio remote control apparatus\n901910 - Electrical vibratory-massage apparatus\n902710 - Electronic gas or smoke analysis apparatus\n901813 - Magnetic resonance imaging apparatus", "Top Foundational HS Matches": "853710 - Electrical Control And Distribution Boards, < 1Kv\n853720 - Electrical Control And Distribution Boards, > 1Kv\n852692 - Radio Remote Control Apparatus\n901819 - Electro-Diagnostic Apparatus, Nes\n842121 - Water Filtering Or Purifying Machinery Or Apparatus", "Suggested Best Fit": "853720 - Boards, cabinets and similar combinations of apparatus for electric control or the distribution of electricity, for a voltage > 1.000 V but <= 72,5 kV"}, {"SIC Code": "2720", "Classification": "Frontier", "SIC Description": "Manufacture of batteries and accumulators", "Top Frontier HS Matches": "850720 - Lead-acid accumulators, working with liquid electrolyte (excl. spent and starter batteries)\n850710 - Lead-acid accumulators of a kind used for starting piston engines (starter batteries), working with liquid electrolyte (excl. spent)\n850760 - Lithium-ion accumulators (excl. spent)\n850750 - Nickel-metal hydride accumulators (excl. spent)\n850660 - Air-zinc cells and batteries (excl. spent)", "Top Foundational HS Matches": "850780 - Electric Accumulators, Nes\n850730 - Nickel-Cadmium Electric Accumulators\n850710 - Lead-Acid Electric Accumulators (Vehicle)\n850720 - Lead-Acid Electric Accumulators Except For Vehicles\n850650 - Lithium Batteries", "Suggested Best Fit": "850720 - Lead-acid accumulators, working with liquid electrolyte (excl. spent and starter batteries)"}, {"SIC Code": "2731", "Classification": "Frontier", "SIC Description": "Manufacture of fibre optic cables", "Top Frontier HS Matches": "853670 - Connectors for optical fibres, optical fibre bundles or cables\n854470 - Optical fibre cables made up of individually sheathed fibres, whether or not containing electric conductors or fitted with connectors\n681511 - Carbon Fibres For Non-Electrical Uses\n293930 - Caffeine and its salts\n360340 - Detonating caps", "Top Foundational HS Matches": "853670 - Connectors For Optical Fibres, Optical Fibre Bundles Or Cables\n854470 - Optical Fibres And Cables\n681512 - Carbon Fibre Fabrics For Non-Electrical Uses\n530121 - Flax Fibre, Broken Or Scutched\n701915 - Glass Fibre Chemically Bonded Mats", "Suggested Best Fit": "853670 - Connectors for optical fibres, optical fibre bundles or cables"}, {"SIC Code": "2732", "Classification": "Frontier", "SIC Description": "Manufacture of other electronic and electric wires and cables", "Top Frontier HS Matches": "847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes\n854470 - Optical fibre cables made up of individually sheathed fibres, whether or not containing electric conductors or fitted with connectors\n854160 - Mounted piezo-electric crystals\n853670 - Connectors for optical fibres, optical fibre bundles or cables\n854290 - Parts of electronic integrated circuits, n.e.s.", "Top Foundational HS Matches": "854233 - Electronic Integrated Circuits: Amplifiers\n850720 - Lead-Acid Electric Accumulators Except For Vehicles\n853400 - Electronic Printed Circuits\n854290 - Parts Of Electronic Integrated Circuits Etc\n851431 - Electric Electron Beam Furnaces", "Suggested Best Fit": "847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes"}, {"SIC Code": "2733", "Classification": "Frontier", "SIC Description": "Manufacture of wiring devices", "Top Frontier HS Matches": "854159 - Semiconductor devices, n.e.s.\n854430 - Ignition wiring sets and other wiring sets for vehicles, aircraft or ships\n854130 - Thyristors, diacs and triacs (excl. photosensitive semiconductor devices)\n903082 - Instruments and apparatus for measuring or checking semiconductor wafers or devices, incl. integrated circuits\n848620 - Machines and apparatus for the manufacture of semiconductor devices or of electronic integrated circuits", "Top Foundational HS Matches": "847170 - Computer Storage Devices\n854141 - Photosensitive Devices; Leds\n854190 - Parts Of Semiconductor Devices And Similar Devices\n850590 - Electro-Magnets Nes And Parts Of Magnetic Devices\n854151 - Photosensitive Devices; Semiconductor Transducers", "Suggested Best Fit": "854159 - Semiconductor devices, n.e.s."}, {"SIC Code": "2790", "Classification": "Frontier", "SIC Description": "Manufacture of other electrical equipment", "Top Frontier HS Matches": "851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s.\n851180 - Electrical ignition or starting equipment, incl. cut-outs, of a kind used for spark-ignition or compression-ignition internal combustion engines (excl. generators, starter motors, distributors, ignition coils, ignition magnetos, magnetic flywheels and sparking plugs)\n841430 - Compressors for refrigerating equipment, of a power <= 0,4 kW\n681511 - Carbon Fibres For Non-Electrical Uses\n901910 - Electrical vibratory-massage apparatus", "Top Foundational HS Matches": "903031 - Electrical Multimeters\n853290 - Parts Of Electrical Capacitors\n852581 - High-Speed Camera Equipment\n903089 - Electrical Measurement Instruments Nes\n852583 - Night Vision Camera Equipment", "Suggested Best Fit": "851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s."}, {"SIC Code": "2811", "Classification": "Frontier", "SIC Description": "Manufacture of engines and turbines, except aircraft, vehicle and cycle engines", "Top Frontier HS Matches": "880730 - Parts of aeroplanes, helicopters or unmanned aircraft, n.e.s. (excl. those for gliders)\n854430 - Ignition wiring sets and other wiring sets for vehicles, aircraft or ships\n901841 - Dental drill engines, whether or not combined on a single base with other dental equipment\n401130 - New pneumatic tyres, of rubber, of a kind used for aircraft\n880720 - Under-carriages and parts thereof, for aircraft, n.e.s.", "Top Foundational HS Matches": "840890 - Engines, Diesel Except Motor Vehicle/Marine\n840910 - Parts For Spark-Ignition Aircraft Engines\n840710 - Aircraft Engines, Spark-Ignition\n840991 - Parts For Spark-Ignition Engines Except Aircraft\n840820 - Engines, Diesel, For Motor Vehicles", "Suggested Best Fit": "880730 - Parts of aeroplanes, helicopters or unmanned aircraft, n.e.s. (excl. those for gliders)"}, {"SIC Code": "2812", "Classification": "Frontier", "SIC Description": "Manufacture of fluid power equipment", "Top Frontier HS Matches": "841430 - Compressors for refrigerating equipment, of a power <= 0,4 kW\n843120 - Parts of fork-lift trucks and other works trucks fitted with lifting or handling equipment, n.e.s.\n841122 - Turbopropellers of a power > 1.100 kW but <= 3.730 kW\n841121 - Turbopropellers of a power <= 1.100 kW\n851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s.", "Top Foundational HS Matches": "902690 - Parts Of Equipment To Measure Or Check Fluid Variable\n852581 - High-Speed Camera Equipment\n852583 - Night Vision Camera Equipment\n847330 - Parts And Accessories Of Data Processing Equipment Ne\n852582 - Radiation-Hardened Camera Equipment", "Suggested Best Fit": "841430 - Compressors for refrigerating equipment, of a power <= 0,4 kW"}, {"SIC Code": "2813", "Classification": "Frontier", "SIC Description": "Manufacture of other pumps and compressors", "Top Frontier HS Matches": "841490 - Parts of: air or vacuum pumps, air or other gas compressors, fans and ventilating or recycling hoods incorporating a fan, and gas-tight biological safety cabinets, n.e.s.\n841430 - Compressors for refrigerating equipment, of a power <= 0,4 kW\n841370 - Submersible pumps, single-stage\n841861 - Heat pumps (excl. air conditioning machines of heading 8415)\n903120 - Test benches for motors, generators, pumps, etc.", "Top Foundational HS Matches": "841490 - Parts Of Vacuum Pumps, Compressors,Fans,Blowers,Hoods\n841480 - Air Or Gas Compressors, Hoods\n841381 - Pumps Nes\n841391 - Parts Of Pumps For Liquids\n841430 - Compressors For Refrigerating Equipment", "Suggested Best Fit": "841490 - Parts of: air or vacuum pumps, air or other gas compressors, fans and ventilating or recycling hoods incorporating a fan, and gas-tight biological safety cabinets, n.e.s."}, {"SIC Code": "2814", "Classification": "Frontier", "SIC Description": "Manufacture of other taps and valves", "Top Frontier HS Matches": "903220 - Manostats (excl. taps, cocks and valves of heading 8481)\n903281 - Hydraulic or pneumatic regulating or controlling instruments and apparatus (excl. manostats and taps, cocks and valves of heading 8481)\n903289 - Regulating or controlling instruments and apparatus (excl. hydraulic or pneumatic, manostats, thermostats, and taps, cocks and valves of heading 8481)\n848110 - Pressure-reducing valves combined with filters or lubricators\n847510 - Machines for assembling electric or electronic lamps, tubes or valves or flashbulbs, in glass envelopes", "Top Foundational HS Matches": "848190 - Parts Of Taps, Cocks, Valves Or Similar Appliances\n848180 - Taps, Cocks, Valves And Similar Appliances, Nes\n848130 - Valves, Check\n848140 - Valves, Safety Or Relief\n848110 - Valves, Pressure Reducing", "Suggested Best Fit": "903220 - Manostats (excl. taps, cocks and valves of heading 8481)"}, {"SIC Code": "2815", "Classification": "Frontier", "SIC Description": "Manufacture of bearings, gears, gearing and driving elements", "Top Frontier HS Matches": "848340 - Spur and helical gears and gearing, for machinery (excl. friction gears, gear boxes and other speed changers)\n848210 - Ball bearings with greatest external diameter <= 30 mm\n848240 - Needle roller bearings, incl. cage and needle roller assemblies\n848220 - Tapered roller bearings, incl. cone and tapered roller assemblies\n853690 - Prefabricated elements for electrical circuits, for a voltage of <= 1.000 V", "Top Foundational HS Matches": "848250 - Bearings, Cylindrical Roller, Nes\n848220 - Bearings, Tapered Roller, Including Assemblies\n848230 - Bearings, Spherical Roller\n900190 - Prisms, Mirrors And Optical Elements Nes, Unmounted\n900290 - Mounted Lenses, Prisms, Mirrors, Optical Elements Nes", "Suggested Best Fit": "848340 - Spur and helical gears and gearing, for machinery (excl. friction gears, gear boxes and other speed changers)"}, {"SIC Code": "2825", "Classification": "Frontier", "SIC Description": "Manufacture of non-domestic cooling and ventilation equipment", "Top Frontier HS Matches": "901841 - Dental drill engines, whether or not combined on a single base with other dental equipment\n841430 - Compressors for refrigerating equipment, of a power <= 0,4 kW\n851190 - Parts of electrical ignition or starting equipment, generators, etc. of heading 8511, n.e.s.\n901920 - Mechanical ventilation apparatus, capable of providing invasive ventilation\n843120 - Parts of fork-lift trucks and other works trucks fitted with lifting or handling equipment, n.e.s.", "Top Foundational HS Matches": "903289 - Automatic Regulating/Controlling Equipment Nes\n903180 - Measuring Or Checking Equipment, Nes\n902790 - Microtomes, Parts Of Scientific Analysis Equipment\n903190 - Parts And Access For Measuring, Checking Equipment Ne\n852583 - Night Vision Camera Equipment", "Suggested Best Fit": "901841 - Dental drill engines, whether or not combined on a single base with other dental equipment"}, {"SIC Code": "2830", "Classification": "Frontier", "SIC Description": "Manufacture of agricultural and forestry machinery", "Top Frontier HS Matches": "843699 - Parts of agricultural, horticultural, forestry or bee-keeping machinery, n.e.s.\n843290 - Parts of agricultural, horticultural or forestry machinery for soil preparation or cultivation or of lawn or sports-ground rollers, n.e.s.\n843280 - Agricultural, horticultural or forestry machinery for soil preparation or cultivation; lawn or sports-ground rollers (excl. sprayers and dusters, ploughs, harrows, scarifiers, cultivators, weeders, hoes, seeders, planters, manure spreaders and fertiliser distributors)\n843680 - Forestry machinery, n.e.s.\n870191 - Agricultural tractors and forestry tractors, wheeled, of an engine power <= 18 kW (excl. pedestrian-controlled tractors)", "Top Foundational HS Matches": "401170 - Rubber; New Pneumatic Tyres, Of A Kind Used On Agricultural Or Forestry Vehicles And Machines\n842139 - Filtering Or Purifying Machinery For Gases Nes\n842121 - Water Filtering Or Purifying Machinery Or Apparatus\n842129 - Filtering/Purifying Machinery For Liquids Nes\n841960 - Machinery For Liquefying Air Or Other Gases", "Suggested Best Fit": "843699 - Parts of agricultural, horticultural, forestry or bee-keeping machinery, n.e.s."}, {"SIC Code": "2849", "Classification": "Frontier", "SIC Description": "Manufacture of other machine tools", "Top Frontier HS Matches": "847981 - Machinery for treating metal, incl. electric wire coil-winders, n.e.s. (excl. industrial robots, furnaces, dryers, spray guns and the like, high-pressure cleaning equipment and other jet cleaners, rolling millls or machines, machine tools and rope or cable-making machines)\n930200 - Revolvers and pistols (excl. those of heading 9303 or 9304 and sub-machine guns for military purposes)\n930630 - Cartridges and parts thereof for revolvers and pistols of heading 9302 and for sub-machine-guns of heading 9301\n930190 - Military weapons, incl. sub-machine guns (excl. artillery weapons, rocket launchers, flame-throwers, grenade launchers, torpedo tubes and similar projectors,  revolvers and pistols of heading 9302 and cutting and thrusting weapons of heading 9307)\n854071 - Magnetrons", "Top Foundational HS Matches": "903082 - Semiconductor Inspection Tools\n903149 - Miscellaneous Optical Measurement Tools\n903141 - Optical Tools For Semiconductor & Photomask Inspection\n290543 - Mannitol\n251820 - Calcined Dolomite", "Suggested Best Fit": "847981 - Machinery for treating metal, incl. electric wire coil-winders, n.e.s. (excl. industrial robots, furnaces, dryers, spray guns and the like, high-pressure cleaning equipment and other jet cleaners, rolling millls or machines, machine tools and rope or cable-making machines)"}, {"SIC Code": "2899", "Classification": "Frontier", "SIC Description": "Manufacture of other special-purpose machinery nec", "Top Frontier HS Matches": "870490 - Motor vehicles for the transport of goods, with engines other than internal combustion piston engine or electric motor (excl. dumpers for off-highway use of subheading 8704.10 and special purpose motor vehicles of heading 8705)\n870899 - Parts and accessories for the industrial assembly of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or with spark-ignition internal piston engine <= 2800 cm³, special purpose motor vehicles of heading 8705, n.e.s.\n870829 - Parts and accessories for the industrial assembly of bodies of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or spark-ignition internal piston engine <= 2800 cm³; special purpose motor vehicles of No 8705 (excl. bumpers, safety seat belts and front windscreens \"windshields\", rear windows and other windows)\n870821 - Safety seat belts for the industrial assembly of : motor cars and other motor vehicles principally designed for the transport of persons, vehicles for the transport of goods, with compression-ignition internal combustion piston engine \"diesel or semi-diesel\" of a cylinder capacity <= 2.500 cm³ or with spark-ignition internal piston engine of a cylinder capacity <= 2.800 cm³ and special purpose motor vehicles of heading 8705\n870894 - Steering wheels, steering columns and steering boxes, and parts thereof, for the industrial assembly of: motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or with spark-ignition internal piston engine <= 2800 cm³, special purpose motor vehicles of heading 8705, n.e.s", "Top Foundational HS Matches": "870590 - Other Special Purpose Motor Vehicles\n842139 - Filtering Or Purifying Machinery For Gases Nes\n842129 - Filtering/Purifying Machinery For Liquids Nes\n900630 - Cameras For Special Use, Underwater,Aerial, Etc\n842121 - Water Filtering Or Purifying Machinery Or Apparatus", "Suggested Best Fit": "870490 - Motor vehicles for the transport of goods, with engines other than internal combustion piston engine or electric motor (excl. dumpers for off-highway use of subheading 8704.10 and special purpose motor vehicles of heading 8705)"}, {"SIC Code": "2910", "Classification": "Frontier", "SIC Description": "Manufacture of motor vehicles", "Top Frontier HS Matches": "940120 - Seats for motor vehicles\n851290 - Parts of electrical burglar alarms of a kind used for motor vehicles, n.e.s.\n851240 - Electrical windscreen wipers, defrosters and demisters, for motor vehicles\n851230 - Sound signalling burglar alarms, electrical, of a kind used for motor vehicles\n870240 - Motor vehicles for the transport of >= 10 persons, incl. driver, with only electric motor for propulsion", "Top Foundational HS Matches": "870840 - Transmissions For Motor Vehicles\n840820 - Engines, Diesel, For Motor Vehicles\n870590 - Other Special Purpose Motor Vehicles\n401310 - Inner Tubes Of Rubber For Motor Vehicles\n700910 - Rear-View Mirrors For Vehicles", "Suggested Best Fit": "940120 - Seats for motor vehicles"}, {"SIC Code": "2920", "Classification": "Frontier", "SIC Description": "Manufacture of bodies (coachwork) for motor vehicles; manufacture of trailers and semi-trailers", "Top Frontier HS Matches": "870790 - Bodies for the industrial assembly of pedestrian controlled tractors of subheading 8701.10, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" of a cylinder capacity <= 2.500 cm³ or with spark-ignition internal piston engine of a cylinder capacity <= 2.800 cm³ and special purpose motor vehicles of heading 8705\n870829 - Parts and accessories for the industrial assembly of bodies of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or spark-ignition internal piston engine <= 2800 cm³; special purpose motor vehicles of No 8705 (excl. bumpers, safety seat belts and front windscreens \"windshields\", rear windows and other windows)\n870710 - Bodies for the industrial assembly of motor cars and other motor vehicles principally designed for the transport of persons\n870124 - Road tractors for semi-trailers, with only electric motor for propulsion, new\n870421 - Motor vehicles for the transport of highly radioactive materials [Euratom], with only compression-ignition internal combustion piston engine \"diesel or semi-diesel\", of a gross vehicle weight <= 5 t", "Top Foundational HS Matches": "871640 - Trailers, Semi-Trailers Nes\n401310 - Inner Tubes Of Rubber For Motor Vehicles\n840820 - Engines, Diesel, For Motor Vehicles\n870840 - Transmissions For Motor Vehicles\n870590 - Other Special Purpose Motor Vehicles", "Suggested Best Fit": "870790 - Bodies for the industrial assembly of pedestrian controlled tractors of subheading 8701.10, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" of a cylinder capacity <= 2.500 cm³ or with spark-ignition internal piston engine of a cylinder capacity <= 2.800 cm³ and special purpose motor vehicles of heading 8705"}, {"SIC Code": "2932", "Classification": "Frontier", "SIC Description": "Manufacture of other parts and accessories for motor vehicles", "Top Frontier HS Matches": "870899 - Parts and accessories for the industrial assembly of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or with spark-ignition internal piston engine <= 2800 cm³, special purpose motor vehicles of heading 8705, n.e.s.\n870829 - Parts and accessories for the industrial assembly of bodies of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or spark-ignition internal piston engine <= 2800 cm³; special purpose motor vehicles of No 8705 (excl. bumpers, safety seat belts and front windscreens \"windshields\", rear windows and other windows)\n870870 - Road wheels and parts and accessories thereof, for the industrial assembly of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or with spark-ignition internal piston engine <= 2800 cm³, and special purpose motor vehicles of heading 8705, n.e.s.\n940120 - Seats for motor vehicles\n851290 - Parts of electrical burglar alarms of a kind used for motor vehicles, n.e.s.", "Top Foundational HS Matches": "870840 - Transmissions For Motor Vehicles\n840820 - Engines, Diesel, For Motor Vehicles\n401310 - Inner Tubes Of Rubber For Motor Vehicles\n870590 - Other Special Purpose Motor Vehicles\n901190 - Parts And Accessories For Optical Microscopes", "Suggested Best Fit": "870899 - Parts and accessories for the industrial assembly of: pedestrian-controlled tractors, motor cars and vehicles principally designed for the transport of persons, vehicles for the transport of goods with compression-ignition internal combustion piston engine \"diesel or semi-diesel engine\" <= 2500 cm³ or with spark-ignition internal piston engine <= 2800 cm³, special purpose motor vehicles of heading 8705, n.e.s."}, {"SIC Code": "3011", "Classification": "Frontier", "SIC Description": "Building of ships and floating structures", "Top Frontier HS Matches": "890790 - Rafts, tanks, coffer-dams, landing stages, buoys, beacons and other floating structures (excl. inflatable rafts, vessels of heading 8901 to 8906 and floating structures for breaking up)\n902590 - Parts and accessories for hydrometers, areometers and similar floating instruments, thermometers, pyrometers, barometers, hygrometers and psychrometers, n.e.s.\n854430 - Ignition wiring sets and other wiring sets for vehicles, aircraft or ships\n901720 - Plotters as drawing or marking-out instruments\n843231 - No-till direct seeders, planters and transplanters", "Top Foundational HS Matches": "681011 - Building Blocks, Bricks Of Cement, Or Artificial Ston\n761090 - Aluminium Structures And Parts Nes, For Construction\n730890 - Structures And Parts Of Structures, Iron Or Steel, Ne\n890590 - Floating Docks, Special Function Vessels Nes\n848710 - Ships' Or Boats' Propellers And Blades Therefor", "Suggested Best Fit": "890790 - Rafts, tanks, coffer-dams, landing stages, buoys, beacons and other floating structures (excl. inflatable rafts, vessels of heading 8901 to 8906 and floating structures for breaking up)"}, {"SIC Code": "3030", "Classification": "Frontier", "SIC Description": "Manufacture of air and spacecraft and related machinery", "Top Frontier HS Matches": "841960 - Machinery for liquefying air or other gases\n843680 - Forestry machinery, n.e.s.\n880521 - Air combat simulators and parts thereof\n843699 - Parts of agricultural, horticultural, forestry or bee-keeping machinery, n.e.s.\n843490 - Parts of milking machines and dairy machinery, n.e.s.", "Top Foundational HS Matches": "841960 - Machinery For Liquefying Air Or Other Gases\n850660 - Air-Zinc Batteries\n842139 - Filtering Or Purifying Machinery For Gases Nes\n842129 - Filtering/Purifying Machinery For Liquids Nes\n841582 - Air Conditioners Nes, With Refrigerating Unit", "Suggested Best Fit": "841960 - Machinery for liquefying air or other gases"}, {"SIC Code": "3040", "Classification": "Frontier", "SIC Description": "Manufacture of military fighting vehicles", "Top Frontier HS Matches": "871000 - Tanks and other armoured fighting vehicles, motorised, whether or not fitted with weapons, and parts of such vehicles, n.e.s.\n940120 - Seats for motor vehicles\n902920 - Speed indicators for land vehicles\n851290 - Parts of electrical burglar alarms of a kind used for motor vehicles, n.e.s.\n930591 - Parts and accessories of military weapons of heading 9301, n.e.s.", "Top Foundational HS Matches": "860400 - Maintenance-Of-Way Service Vehicles\n842691 - Cranes Designed For Mounting On Road Vehicles\n870840 - Transmissions For Motor Vehicles\n700910 - Rear-View Mirrors For Vehicles\n840820 - Engines, Diesel, For Motor Vehicles", "Suggested Best Fit": "871000 - Tanks and other armoured fighting vehicles, motorised, whether or not fitted with weapons, and parts of such vehicles, n.e.s."}, {"SIC Code": "3250", "Classification": "Frontier", "SIC Description": "Manufacture of medical and dental instruments and supplies", "Top Frontier HS Matches": "901832 - Tubular metal needles, used in medical, surgical, dental or veterinary sciences\n901831 - Syringes of plastics, with or without needles, used in medical, surgical, dental or veterinary sciences\n901820 - Ultraviolet or infra-red ray apparatus used in medical, surgical, dental or veterinary sciences\n901839 - Needles, catheters, cannulae and the like, used in medical, surgical, dental or veterinary sciences (excl. syringes, tubular metal needles and needles for sutures)\n902214 - Apparatus based on the use of X-rays, for medical, surgical or veterinary uses (excl. for dental purposes and computer tomography apparatus)", "Top Foundational HS Matches": "901890 - Instruments, Appliances For Medical, Etc Science, Nes\n903089 - Electrical Measurement Instruments Nes\n901480 - Navigational Instruments And Appliances Nes\n901380 - Optical Devices, Appliances And Instruments, Nes\n401512 - Medical Vulcanised Rubber Gloves", "Suggested Best Fit": "901832 - Tubular metal needles, used in medical, surgical, dental or veterinary sciences"}, {"SIC Code": "3299", "Classification": "Frontier", "SIC Description": "Other manufacturing nec", "Top Frontier HS Matches": "848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit\n847529 - Machines for manufacturing or hot working glass or glassware (excl. machines for making optical fibres and preforms thereof, furnaces and heating apparatus for manufacturing toughened glass, and machines for additive manufacturing)\n903110 - Machines for balancing mechanical parts\n903032 - Multimeters with recording device\n360340 - Detonating caps", "Top Foundational HS Matches": "848580 - Additive Manufacturing Machines For Non-Metal/Non-Plastic Materials\n848590 - Machines Parts For Additive Manufacturing\n848520 - Additive Manufacturing Machines For Plastics/Rubber\n848510 - Machines For Additive Manufacturing; By Metal Deposit\n848530 - Additive Manufacturing Machines For Plaster/Cement/Ceramics/Glass", "Suggested Best Fit": "848530 - Machines for additive manufacturing by plaster, cement or ceramic deposit"}, {"SIC Code": "3316", "Classification": "Frontier", "SIC Description": "Repair and maintenance of aircraft and spacecraft", "Top Frontier HS Matches": "940110 - Seats for aircraft\n880730 - Parts of aeroplanes, helicopters or unmanned aircraft, n.e.s. (excl. those for gliders)\n401213 - Retreaded pneumatic tyres, of rubber, of a kind used on aircraft\n854430 - Ignition wiring sets and other wiring sets for vehicles, aircraft or ships\n840710 - Spark-ignition reciprocating or rotary internal combustion piston engine, for aircraft", "Top Foundational HS Matches": "860400 - Maintenance-Of-Way Service Vehicles\n700721 - Safety Glass (Laminated) For Vehicles, Aircraft, Etc\n401213 - Retreaded Tyres: Of A Kind Used On Aircraft\n840910 - Parts For Spark-Ignition Aircraft Engines\n840991 - Parts For Spark-Ignition Engines Except Aircraft", "Suggested Best Fit": "940110 - Seats for aircraft"}, {"SIC Code": "3521", "Classification": "Frontier", "SIC Description": "Manufacture of gas", "Top Frontier HS Matches": "902710 - Electronic gas or smoke analysis apparatus\n930400 - Spring, air or gas guns and pistols, truncheons and other non-firearms (excl. swords, cutlasses, bayonettes and similar arms of heading 9307)\n902910 - Revolution counters, production counters, taximeters, milometers, pedometers and the like (excl. gas, liquid and electricity meters)\n841490 - Parts of: air or vacuum pumps, air or other gas compressors, fans and ventilating or recycling hoods incorporating a fan, and gas-tight biological safety cabinets, n.e.s.\n902750 - Instruments and apparatus for physical or chemical analysis, using UV, visible or IR optical radiations (excl. spectrometers, spectrophotometers, spectrographs, and gas or smoke analysis apparatus)", "Top Foundational HS Matches": "841480 - Air Or Gas Compressors, Hoods\n902710 - Gas/Smoke Analysis Apparatus\n730429 - Seamless Pipes: For Oil Or Gas Drilling\n841181 - Gas Turbine Engines Nes Of A Power < 5000 Kw\n841182 - Gas Turbine Engines Nes Of A Power > 5000 Kw", "Suggested Best Fit": "902710 - Electronic gas or smoke analysis apparatus"}, {"SIC Code": "3821", "Classification": "Frontier", "SIC Description": "Treatment and disposal of non-hazardous waste", "Top Frontier HS Matches": "284410 - Natural uranium, crude; waste and scrap, of natural uranium [Euratom]\n843353 - Potato-diggers and potato harvesters\n853690 - Prefabricated elements for electrical circuits, for a voltage of <= 1.000 V\n841920 - Medical, surgical or laboratory sterilizers\n841990 - Parts of medical, surgical or laboratory sterilizers, n.e.s.", "Top Foundational HS Matches": "810330 - Tantalum: Waste And Scrap\n841989 - Machinery For Treatment By Temperature Change Nes\n810197 - Tungsten (Wolfram): Waste And Scrap\n811020 - Antimony: Waste And Scrap\n720449 - Ferrous Waste Or Scrap, Nes", "Suggested Best Fit": "284410 - Natural uranium, crude; waste and scrap, of natural uranium [Euratom]"}, {"SIC Code": "3832", "Classification": "Foundational", "SIC Description": "Recovery of sorted materials", "Top Frontier HS Matches": "843359 - Forage harvesters, self-propelled\n930510 - Parts and accessories for revolvers or pistols, n.e.s.\n850240 - Electric rotary converters\n293944 - Norephedrine and its salts\n903210 - Electronic thermostats", "Top Foundational HS Matches": "283325 - Copper Sulphates\n847170 - Computer Storage Devices\n690290 - Refractory Bricks Etc Nes\n690210 - Refractory Bricks, Etc With >50% Mg, Ca Or Cr As Oxid\n720521 - Powders, Alloy Steel", "Suggested Best Fit": "283325 - Copper Sulphates"}];
+
+
+document.getElementById('uploadStatus').textContent =
+    'Built-in SIC-to-HS database loaded successfully. 80 SIC records available.';
+
+function searchSIC(){
+
+
+    const input =
+        document.getElementById('sicInput')
+        .value.trim();
+
+    if(!input){
+
+        alert('Please enter an SIC code.');
+
+        return;
+
+    }
+
+    const record = sicData.find(row =>
+
+        String(row['SIC Code']).trim() === input
+
+    );
+
+    if(!record){
+
+        document.getElementById('resultContainer')
+        .style.display = 'none';
+
+        const status =
+            document.getElementById('uploadStatus');
+
+        status.className = 'error';
+
+        status.textContent =
+            `No SIC match found for code: ${input}`;
+
+        return;
+
+    }
+
+    document.getElementById('uploadStatus')
+    .textContent = '';
+
+    document.getElementById('sicCodeResult')
+    .textContent =
+        record['SIC Code'] || '-';
+
+    document.getElementById('sicDescriptionResult')
+    .textContent =
+        record['SIC Description'] || '-';
+
+    document.getElementById('frontierResult')
+    .textContent =
+        record['Top Frontier HS Matches'] || '-';
+
+    document.getElementById('foundationalResult')
+    .textContent =
+        record['Top Foundational HS Matches'] || '-';
+
+    document.getElementById('resultContainer')
+    .style.display = 'block';
+
+}
+
+</script>
+
+</body>
+</html>
