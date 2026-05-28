@@ -1412,12 +1412,20 @@ function searchEligibilitySIC(){
     let results = '';
     let buttons = '';
 
-    if(eiiMatch){
+  if(eiiMatch){
 
-        results += `
-        <div class="success" style="margin-bottom:15px;">
-            ✔ Qualifies for EII and gets NCC!
-        </div>`;
+    results += `
+    <div class="success" style="margin-bottom:15px;">
+        ✔ Qualifies for EII and gets NCC!
+    </div>`;
+
+    // HIDE BUTTON FOR USER 99999
+
+    const currentUser =
+        document.getElementById("welcomeMessage")
+        .innerText;
+
+    if(!currentUser.includes("Leyton User")){
 
         buttons += `
         <button
@@ -1430,6 +1438,7 @@ function searchEligibilitySIC(){
 
     }
 
+}
     if(bicsMatch){
 
         results += `
