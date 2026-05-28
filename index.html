@@ -761,8 +761,14 @@ td{
 
                     <div class="sidebar-item"
                     onclick="openTool('sicEligibilityTool')">
+                    
                         SIC Search
                     </div>
+
+                    <div class="sidebar-item"
+                      onclick="logout()">
+                         Logout
+</div>
 
                 </div>
 
@@ -1419,7 +1425,7 @@ function searchEligibilitySIC(){
         ✔ Qualifies for EII and gets NCC!
     </div>`;
 
-    // HIDE BUTTON FOR USER 99999
+    // HIDE BUTTON FOR USER AAAAA
 
     const currentUser =
         document.getElementById("welcomeMessage")
@@ -1491,23 +1497,23 @@ function searchEligibilitySIC(){
 const users = [
 
     {
-        id:"99645",
-        name:"Marwan"
+        id:"75295",
+        name:"Abdelfattah"
     },
 
     {
-        id:"55555",
-        name:"Fahd"
+        id:"48271",
+        name:"Abir"
     },
 
     {
-        id:"10000",
-        name:"Lina"
+        id:"94036",
+        name:"Aya"
     },
 
     {
-        id:"33333",
-        name:"Yara"
+        id:"24395",
+        name:"Bouthayna"
     },
 
     {
@@ -1516,7 +1522,65 @@ const users = [
     },
 
     {
-        id:"99999",
+        id:"23953",
+        name:"Elmahdi"
+    },
+
+    {
+        id:"98468",
+        name:"Fahd"
+    },
+
+    {
+        id:"98563",
+        name:"Fatima Zahra"
+    },
+
+    {
+        id:"65093",
+        name:"Lina"
+    },
+
+    {
+        id:"35964",
+        name:"Lubna"
+    },
+
+    {
+        id:"37530",
+        name:"Manal"
+    },
+
+    {
+        id:"37595",
+        name:"Meryem"
+    },
+
+    {
+        id:"58620",
+        name:"Nada"
+    },
+
+    {
+        id:"60977",
+        name:"Nisrine"
+    },
+
+    {
+        id:"66309",
+        name:"Oussama"
+    },
+
+    {
+        id:"54399",
+        name:"Yasmina"
+    },
+
+
+
+
+    {
+        id:"AAAAA",
         name:"Leyton User"
     }
 
@@ -1525,6 +1589,54 @@ const users = [
 /* =========================
    LOGIN
 ========================= */
+
+function checkSavedLogin(){
+
+    const savedID =
+        localStorage.getItem("portalUserID");
+
+    if(!savedID) return;
+
+    const validUser =
+        users.find(user => user.id === savedID);
+
+    if(!validUser) return;
+
+    document.getElementById("loginScreen")
+    .style.display = "none";
+
+    document.getElementById("dashboard")
+    .style.display = "block";
+
+    document.getElementById("welcomeMessage")
+    .innerText =
+    "Welcome, " + validUser.name;
+
+    // HIDE EII TOOL ONLY FOR AAAAA
+
+    if(savedID === "AAAAA"){
+
+        document.querySelectorAll('[onclick="openTool(\'eiiTool\')"]')
+        .forEach(el => {
+
+            el.style.display = "none";
+
+        });
+
+        document.querySelectorAll(".tool-card")
+        .forEach(card => {
+
+            if(card.innerText.includes("Electricity Intensity Calculator")){
+
+                card.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+}
 
 function login(){
 
@@ -1548,9 +1660,13 @@ function login(){
         .innerText =
         "Welcome, " + validUser.name;
 
-        // HIDE EII TOOL ONLY FOR 99999
+        // SAVE SESSION
 
-        if(enteredID === "99999"){
+         localStorage.setItem("portalUserID", enteredID);
+
+        // HIDE EII TOOL ONLY FOR AAAAA
+
+        if(enteredID === "AAAAA"){
 
             document.querySelectorAll('[onclick="openTool(\'eiiTool\')"]')
             .forEach(el => {
@@ -1585,6 +1701,14 @@ function login(){
 /* =========================
    NAVIGATION
 ========================= */
+
+function logout(){
+
+    localStorage.removeItem("portalUserID");
+
+    location.reload();
+
+}
 
 function openTool(toolId){
 
@@ -2457,6 +2581,8 @@ document.querySelectorAll(".calc-input")
 });
 
 calculate();
+
+checkSavedLogin();
 
 </script>
 
